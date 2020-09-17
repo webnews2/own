@@ -5,6 +5,10 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 
 public class GamesAdapter extends BaseAdapter {
+
+    // Tag for (logcat) information logging
+    private static final String TAG = GamesAdapter.class.getSimpleName();
+
     @Override
     public int getCount() {
         return 0;
