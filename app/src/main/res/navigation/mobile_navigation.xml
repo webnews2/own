@@ -7,15 +7,15 @@
 
     <fragment
         android:id="@+id/navigation_wishlist"
-        android:name="com.github.webnews2.own.ui.wishlist.WishlistFragment"
+        android:name="com.github.webnews2.own.ui.wish_list.WishListFragment"
         android:label="@string/title_wishlist"
-        tools:layout="@layout/fragment_wishlist" />
+        tools:layout="@layout/fragment_wish_list" />
 
     <fragment
         android:id="@+id/navigation_games"
-        android:name="com.github.webnews2.own.ui.games.GamesFragment"
+        android:name="com.github.webnews2.own.ui.titles.TitlesFragment"
         android:label="@string/title_games"
-        tools:layout="@layout/fragment_games" />
+        tools:layout="@layout/fragment_titles" />
 
     <fragment
         android:id="@+id/navigation_settings"

@@ -12,6 +12,7 @@ import com.github.webnews2.own.R;
 public class SettingsFragment extends Fragment {
 
     public SettingsFragment() {
+        // Required empty public constructor
     }
 
     public View onCreateView( LayoutInflater inflater,
