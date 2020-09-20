@@ -8,18 +8,28 @@
     <fragment
         android:id="@+id/navigation_wishlist"
         android:name="com.github.webnews2.own.ui.wish_list.WishListFragment"
-        android:label="@string/title_wishlist"
+        android:label="@string/title_wish_list"
         tools:layout="@layout/fragment_wish_list" />
 
     <fragment
         android:id="@+id/navigation_games"
         android:name="com.github.webnews2.own.ui.titles.TitlesFragment"
         android:label="@string/title_games"
-        tools:layout="@layout/fragment_titles" />
+        tools:layout="@layout/fragment_titles" >
+        <action
+            android:id="@+id/action_navigation_games_to_addTitlesFragment"
+            app:destination="@id/addTitlesFragment" />
+    </fragment>
 
     <fragment
         android:id="@+id/navigation_settings"
         android:name="com.github.webnews2.own.ui.settings.SettingsFragment"
         android:label="@string/title_settings"
         tools:layout="@layout/fragment_settings" />
+
+    <fragment
+        android:id="@+id/addTitlesFragment"
+        android:name="com.github.webnews2.own.ui.titles.AddTitleFragment"
+        android:label="fragment_add_titles"
+        tools:layout="@layout/fragment_add_title" />
 </navigation>

@@ -9,11 +9,11 @@ public class Title {
 
     private int id;
     private String name;
-    private Image thumbnail;
+    private String thumbnail;
     private boolean onWishList;
     private String location;
 
-    public Title(String p_name, Image p_thumbnail, boolean p_onWishList, String p_location) {
+    public Title(String p_name, String p_thumbnail, boolean p_onWishList, String p_location) {
         name = p_name;
         thumbnail = p_thumbnail;
         onWishList = p_onWishList;
@@ -29,11 +29,11 @@ public class Title {
         this.name = name;
     }
 
-    public Image getThumbnail() {
+    public String getThumbnail() {
         return thumbnail;
     }
 
-    public void setThumbnail(Image thumbnail) {
+    public void setThumbnail(String thumbnail) {
         this.thumbnail = thumbnail;
     }
 
@@ -52,4 +52,6 @@ public class Title {
     public void setLocation(String location) {
         this.location = location;
     }
+
+    // TODO: Implement method to get path of image for db ops
 }

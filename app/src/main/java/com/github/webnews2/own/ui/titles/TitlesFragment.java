@@ -7,11 +7,11 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
+import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentTransaction;
 
 import com.github.webnews2.own.R;
-import com.github.webnews2.own.utilities.DBHelper;
-import com.github.webnews2.own.utilities.Title;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 
@@ -47,18 +47,18 @@ public class TitlesFragment extends Fragment {
 //        lvGames.setAdapter(aaGames);
 
         FloatingActionButton fab = root.findViewById(R.id.fabAddGame);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
+        fab.setOnClickListener(view -> {
 //                lGames.add("Test");
 //                aaGames.notifyDataSetChanged();
-                Title test = new Title("Fortnite", null, false, null);
+//                Title test = new Title("Fortnite", null, false, null);
+//
+//                if (DBHelper.getInstance(getContext()).addGame(test)) {
+//                    Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
+//                            .setAction("Action", null).show();
+//                }
 
-                if (DBHelper.getInstance(getContext()).addGame(test)) {
-                    Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                            .setAction("Action", null).show();
-                }
-            }
+            AddTitleFragment newTitle = AddTitleFragment.newInstance("", "");
+            newTitle.show(getChildFragmentManager(), "");
         });
 
         return root;

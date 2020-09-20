@@ -2,6 +2,7 @@ package com.github.webnews2.own.utilities;
 
 import android.content.ContentValues;
 import android.content.Context;
+import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
@@ -76,10 +77,10 @@ public class DBHelper extends SQLiteOpenHelper {
         lsQueries.add(
             "CREATE TABLE IF NOT EXISTS " + TBL_TITLES + " ("
                 + TBL_TITLES_COL_ID + " INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, "
-                + TBL_TITLES_COL_NAME + " VARCHAR(255) NOT NULL, "
-                + TBL_TITLES_COL_THUMBNAIL + " BLOB, "
+                + TBL_TITLES_COL_NAME + " TEXT NOT NULL, "
+                + TBL_TITLES_COL_THUMBNAIL + " TEXT, " // only contains the path
                 + TBL_TITLES_COL_ON_WISH_LIST + " BOOLEAN DEFAULT FALSE NOT NULL, "
-                + TBL_TITLES_COL_LOCATION + " VARCHAR(255)"
+                + TBL_TITLES_COL_LOCATION + " TEXT"
                 //+ "creationTime TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL, "
                 //+ "updateTime TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL"
             + ");"
@@ -89,7 +90,7 @@ public class DBHelper extends SQLiteOpenHelper {
         lsQueries.add(
             "CREATE TABLE IF NOT EXISTS " + TBL_PLATFORMS + " ("
                 + TBL_PLATFORMS_COL_ID + " INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, "
-                + TBL_PLATFORMS_COL_NAME + " VARCHAR(255) NOT NULL"
+                + TBL_PLATFORMS_COL_NAME + " TEXT NOT NULL"
                 //+ "creationTime TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL, "
                 //+ "updateTime TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL"
             + ");"
@@ -147,25 +148,68 @@ public class DBHelper extends SQLiteOpenHelper {
         // TODO: Implement me!
     }
 
-
-    public boolean addGame(Title p_title) {
+    /**
+     * Inserts a game title into the database. The name and the onWishList attribute must be present.
+     *
+     * @param p_title title object containing information about the game title
+     * @return true - if the game title was successfully added to the db otherwise false
+     */
+    public boolean addTitle(Title p_title) {
         SQLiteDatabase db = getWritableDatabase();
         ContentValues cv = new ContentValues();
 
         cv.put(TBL_TITLES_COL_NAME, p_title.getName());
-        //cv.put(TBL_TITLES_COL_THUMBNAIL, null);
+        cv.put(TBL_TITLES_COL_THUMBNAIL, p_title.getThumbnail());
         cv.put(TBL_TITLES_COL_ON_WISH_LIST, p_title.isOnWishList());
-        //cv.put(TBL_TITLES_COL_LOCATION, p_game.getLocation());
+        cv.put(TBL_TITLES_COL_LOCATION, p_title.getLocation());
 
-        return db.insert(TBL_TITLES, null, cv) != -1;
+        boolean result = db.insert(TBL_TITLES, null, cv) != -1;
+        db.close();
+
+        return result;
     }
 
+    /**
+     * Inserts a platform into the database. The name attribute must be present.
+     *
+     * @param p_platform platform object containing information about the platform
+     * @return true - if the platform was successfully added to the db otherwise false
+     */
     public boolean addPlatform(Platform p_platform) {
         SQLiteDatabase db = getWritableDatabase();
         ContentValues cv = new ContentValues();
 
         cv.put(TBL_PLATFORMS_COL_NAME, p_platform.getName());
 
-        return db.insert(TBL_PLATFORMS, null, cv) != -1;
+        boolean result = db.insert(TBL_PLATFORMS, null, cv) != -1;
+        db.close();
+
+        return result;
+    }
+
+    public List<Title> getTitles() {
+        List<Title> lsTitles = new ArrayList<>();
+
+        String query = "SELECT * FROM " + TBL_TITLES;
+
+        SQLiteDatabase db = getReadableDatabase();
+        Cursor cursor = db.rawQuery(query, null);
+
+        // if cursor is not null
+        if (cursor.moveToFirst()) {
+            do {
+                int titleID = cursor.getInt(0);
+                String name = cursor.getString(1);
+                String thumbnail = cursor.getString(2);
+                boolean onWishList = cursor.getInt(3) == 1;
+                String location = cursor.getString(4);
+
+                lsTitles.add(new Title(name, thumbnail, onWishList, location));
+            } while (cursor.moveToNext());
+        }
+
+        cursor.close();
+        db.close();
+        return lsTitles;
     }
 }
