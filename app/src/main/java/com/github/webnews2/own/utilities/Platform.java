@@ -10,6 +10,11 @@ public class Platform {
     private int id;
     private String name;
 
+    public Platform(int p_id, String p_name) {
+        id = p_id;
+        name = p_name;
+    }
+
     public Platform(String p_name) {
         name = p_name;
     }

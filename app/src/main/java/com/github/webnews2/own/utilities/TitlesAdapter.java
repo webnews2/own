@@ -4,10 +4,14 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 
-public class GamesAdapter extends BaseAdapter {
+import java.util.ArrayList;
+
+public class TitlesAdapter extends BaseAdapter {
 
     // Tag for (logcat) information logging
-    private static final String TAG = GamesAdapter.class.getSimpleName();
+    private static final String TAG = TitlesAdapter.class.getSimpleName();
+
+    private ArrayList<Title> lsTitles;
 
     @Override
     public int getCount() {

@@ -4,26 +4,37 @@ import android.app.Dialog;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.provider.DocumentsContract;
 import android.provider.MediaStore;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 
-import androidx.annotation.Nullable;
 import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
 
 import com.github.webnews2.own.R;
+import com.github.webnews2.own.utilities.DBHelper;
+import com.github.webnews2.own.utilities.Platform;
+import com.github.webnews2.own.utilities.Title;
+import com.google.android.material.chip.Chip;
 import com.google.android.material.chip.ChipGroup;
 import com.google.android.material.snackbar.Snackbar;
+import com.google.android.material.textfield.MaterialAutoCompleteTextView;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
+
+import java.util.stream.Collectors;
+
+import static android.app.Activity.RESULT_OK;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -37,14 +48,12 @@ public class AddTitleFragment extends DialogFragment {
 
     private static final int PICKED_IMAGE = 1;
 
-    // Member vars for the ui elements
+    // Member vars
     private ImageView ivThumbnail;
+    private Uri uriThumbnail;
     private ImageButton ibChooseThumbnail;
-    private TextInputLayout ilGameTitle;
     private TextInputEditText etGameTitle;
-    private TextInputLayout ilLocation;
     private TextInputEditText etLocation;
-    private TextInputLayout ilPlatforms;
     private AutoCompleteTextView actvPlatforms;
     private ChipGroup cgPlatforms;
 
@@ -107,55 +116,102 @@ public class AddTitleFragment extends DialogFragment {
         Toolbar toolbar = root.findViewById(R.id.toolbarAddTitles);
         toolbar.setNavigationOnClickListener(v -> dismiss());
         toolbar.setOnMenuItemClickListener(item -> {
-            // TODO: Save data to db
+            saveData();
             dismiss();
             return true;
         });
 
+        // TODO: Implement events for text changes to prevent nulls
         // Set member vars of ui elements
         ivThumbnail = root.findViewById(R.id.ivThumbnail);
         ibChooseThumbnail = root.findViewById(R.id.ibChooseThumbnail);
-        ilGameTitle = root.findViewById(R.id.ilGameTitle);
-        etGameTitle = root.findViewById(R.id.etGameTitle);
-        ilLocation = root.findViewById(R.id.ilLocation);
-        etLocation = root.findViewById(R.id.etLocation);
-        ilPlatforms = root.findViewById(R.id.ilPlatforms);
-        actvPlatforms = root.findViewById(R.id.actvPlatforms);
+        TextInputLayout ilGameTitle = root.findViewById(R.id.ilGameTitle);
+        etGameTitle = (TextInputEditText) ilGameTitle.getEditText();
+        TextInputLayout ilLocation = root.findViewById(R.id.ilLocation);
+        etLocation = (TextInputEditText) ilLocation.getEditText();
+        TextInputLayout ilPlatforms = root.findViewById(R.id.ilPlatforms);
+        actvPlatforms = (MaterialAutoCompleteTextView) ilPlatforms.getEditText();
         cgPlatforms = root.findViewById(R.id.cgPlatforms);
 
         // Set up choose thumbnail functionality
         ibChooseThumbnail.setOnClickListener(v -> {
-            // TODO: Implement image choosing via user's gallery app
+            // Create action to get image from an external app activity
             Intent get = new Intent(Intent.ACTION_GET_CONTENT);
             get.setType("image/*");
 
+            // This will enable the user to pick the application for choosing the image
             Intent pick = new Intent(Intent.ACTION_PICK);
-            pick.setDataAndType(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, "image/*");
+            pick.setDataAndType(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, "image/*"); // external to access shareable media
 
+            // TODO: Add comment
             Intent choose = Intent.createChooser(get, "Select Image");
             choose.putExtra(Intent.EXTRA_INITIAL_INTENTS, new Intent[] {pick});
 
-            startActivityForResult(choose, PICKED_IMAGE);
-
-            Snackbar.make(root, "ImageButton clicked!", Snackbar.LENGTH_LONG).show();
+            // Check if there are activities which can handle the request
+            if (choose.resolveActivity(getActivity().getPackageManager()) != null) {
+                startActivityForResult(choose, PICKED_IMAGE);
+            } else {
+                Snackbar.make(root, "Not suitable app was found.", Snackbar.LENGTH_LONG).show();
+            }
         });
+
+        etGameTitle.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                if (!hasFocus) { // seems too obvious
+                    if (TextUtils.isEmpty(etGameTitle.getText())) {
+                        // Show error message
+                        ilGameTitle.setError("Please enter a game title.");
+                    } else {
+                        // Clear error message
+                        ilGameTitle.setError(null);
+                    }
+                }
+            }
+        });
+
+        // Set autocomplete suggestion list for platforms
+        DBHelper dbh = DBHelper.getInstance(getContext());
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(
+            getContext(),
+            android.R.layout.simple_list_item_1,
+            dbh.getPlatforms().stream().map(Platform::getName).collect(Collectors.toList())
+        );
+        actvPlatforms.setAdapter(adapter);
 
         return root;
     }
 
 
     @Override
-    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-
-        if (data != null) {
-            if (requestCode == PICKED_IMAGE) {
-
-                Uri uriImage = data.getData();
-                String s = uriImage.getPath();
-                ivThumbnail.setImageURI(uriImage); // only for local images
-                Log.i(TAG, "{ojo} Image picked!");
-            }
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        // If request comes from "select image" action and wasn't cancelled
+        if (requestCode == PICKED_IMAGE && resultCode == RESULT_OK) {
+            // Store uri of image and set image of image view
+            uriThumbnail = data.getData();
+            ivThumbnail.setImageURI(uriThumbnail); // only for local images
         }
+        else {
+            Log.e(TAG, "{ojo} Something went wrong during the image selection!");
+            return;
+        }
+    }
+
+
+    private boolean saveData() {
+        DBHelper dbh = DBHelper.getInstance(getContext());
+        boolean result = dbh.addTitle(new Title(
+                etGameTitle.getText().toString().trim(),
+                uriThumbnail.toString(),
+                false,
+                TextUtils.isEmpty(etLocation.getText()) ? null : etLocation.getText().toString().trim()
+        ));
+
+        // TODO: For each chip in chipgroup > add to db
+        dbh.addPlatform(new Platform(actvPlatforms.getText().toString().trim()));
+
+        // TODO: Associate titles and platforms
+
+        return result;
     }
 }

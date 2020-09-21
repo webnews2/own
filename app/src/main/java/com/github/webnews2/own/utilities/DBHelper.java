@@ -8,6 +8,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
+import java.sql.SQLInput;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -195,7 +196,7 @@ public class DBHelper extends SQLiteOpenHelper {
         SQLiteDatabase db = getReadableDatabase();
         Cursor cursor = db.rawQuery(query, null);
 
-        // if cursor is not null
+        // If cursor is not null
         if (cursor.moveToFirst()) {
             do {
                 int titleID = cursor.getInt(0);
@@ -211,5 +212,34 @@ public class DBHelper extends SQLiteOpenHelper {
         cursor.close();
         db.close();
         return lsTitles;
+    }
+
+    /**
+     * Returns a List with all platforms that were added to the db.
+     *
+     * @return a List of type Platform containing all available platforms
+     */
+    public List<Platform> getPlatforms() {
+        List<Platform> lsPlatforms = new ArrayList<>();
+
+        String query = "SELECT * FROM " + TBL_PLATFORMS;
+
+        SQLiteDatabase db = getReadableDatabase();
+        Cursor cursor = db.rawQuery(query, null);
+
+        // If cursor is not null
+        if (cursor.moveToFirst()) {
+            do {
+                // Add each platform to platforms list
+                lsPlatforms.add(new Platform(
+                    cursor.getInt(0),
+                    cursor.getString(1)
+                ));
+            } while (cursor.moveToNext());
+        }
+
+        cursor.close();
+        db.close();
+        return lsPlatforms;
     }
 }
