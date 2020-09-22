@@ -16,7 +16,8 @@ public class Title {
     private String location;
     private ArrayList<Platform> lsPlatforms;
 
-    public Title(String p_name, String p_thumbnail, boolean p_onWishList, String p_location) {
+    public Title(int p_id, String p_name, String p_thumbnail, boolean p_onWishList, String p_location) {
+        id = p_id;
         name = p_name;
         thumbnail = p_thumbnail;
         onWishList = p_onWishList;
@@ -24,6 +25,16 @@ public class Title {
     }
 
     // TODO: Check getters/setters
+
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
     public String getName() {
         return name;
     }

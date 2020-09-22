@@ -7,20 +7,24 @@ import android.os.Bundle;
 import android.provider.MediaStore;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.EditorInfo;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
 
+import com.github.webnews2.own.MainActivity;
 import com.github.webnews2.own.R;
 import com.github.webnews2.own.utilities.DBHelper;
 import com.github.webnews2.own.utilities.Platform;
@@ -151,15 +155,17 @@ public class AddTitleFragment extends DialogFragment {
             if (choose.resolveActivity(getActivity().getPackageManager()) != null) {
                 startActivityForResult(choose, PICKED_IMAGE);
             } else {
-                Snackbar.make(root, "Not suitable app was found.", Snackbar.LENGTH_LONG).show();
+                Snackbar.make(root, "No suitable app was found.", Snackbar.LENGTH_LONG).show();
             }
         });
 
+        // TODO: Think of a good but not limiting input validation for game titles
+        // For now there won't be a real validation of the entered string because of those sometimes very strange titles
         etGameTitle.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
-                if (!hasFocus) { // seems too obvious
-                    if (TextUtils.isEmpty(etGameTitle.getText())) {
+                if (!hasFocus) {
+                    if (TextUtils.isEmpty(etGameTitle.getText())) { // CHECK: seems too obvious
                         // Show error message
                         ilGameTitle.setError("Please enter a game title.");
                     } else {
@@ -170,14 +176,31 @@ public class AddTitleFragment extends DialogFragment {
             }
         });
 
+        // FIXME: List gets hidden by the keyboard, probably just a layout thingy
         // Set autocomplete suggestion list for platforms
         DBHelper dbh = DBHelper.getInstance(getContext());
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(
             getContext(),
             android.R.layout.simple_list_item_1,
-            dbh.getPlatforms().stream().map(Platform::getName).collect(Collectors.toList())
+            MainActivity.lsPlatforms.stream().map(Platform::getName).collect(Collectors.toList())
         );
         actvPlatforms.setAdapter(adapter);
+
+        actvPlatforms.setImeOptions(EditorInfo.IME_ACTION_DONE);
+        actvPlatforms.setImeActionLabel("Add", EditorInfo.IME_ACTION_DONE); // in landscape - label action as add
+        actvPlatforms.setOnEditorActionListener(new AutoCompleteTextView.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                if (actionId == EditorInfo.IME_ACTION_DONE) {
+                    // If entered platform exists in platforms list use that one instead
+                        // If entered platform is not already in chip group
+                            // Add it to chip group
+
+                    return true;
+                }
+                return false;
+            }
+        });
 
         return root;
     }
@@ -199,19 +222,22 @@ public class AddTitleFragment extends DialogFragment {
 
 
     private boolean saveData() {
+        // TODO: Only save when game title is entered and UNIQUE
+
         DBHelper dbh = DBHelper.getInstance(getContext());
-        boolean result = dbh.addTitle(new Title(
+        long titleID = dbh.addTitle(new Title(
+                -1,
                 etGameTitle.getText().toString().trim(),
                 uriThumbnail.toString(),
                 false,
                 TextUtils.isEmpty(etLocation.getText()) ? null : etLocation.getText().toString().trim()
         ));
 
-        // TODO: For each chip in chipgroup > add to db
-        dbh.addPlatform(new Platform(actvPlatforms.getText().toString().trim()));
+        // TODO: For each chip in chipgroup > add to db if UNIQUE
+        long platformID = dbh.addPlatform(new Platform(-1, actvPlatforms.getText().toString().trim()));
 
         // TODO: Associate titles and platforms
 
-        return result;
+        return titleID != -1 && platformID != -1;
     }
 }

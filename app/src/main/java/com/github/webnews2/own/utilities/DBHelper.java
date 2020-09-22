@@ -78,7 +78,7 @@ public class DBHelper extends SQLiteOpenHelper {
         lsQueries.add(
             "CREATE TABLE IF NOT EXISTS " + TBL_TITLES + " ("
                 + TBL_TITLES_COL_ID + " INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, "
-                + TBL_TITLES_COL_NAME + " TEXT NOT NULL, "
+                + TBL_TITLES_COL_NAME + " TEXT UNIQUE NOT NULL, "
                 + TBL_TITLES_COL_THUMBNAIL + " TEXT, " // only contains the path
                 + TBL_TITLES_COL_ON_WISH_LIST + " BOOLEAN DEFAULT FALSE NOT NULL, "
                 + TBL_TITLES_COL_LOCATION + " TEXT"
@@ -91,7 +91,7 @@ public class DBHelper extends SQLiteOpenHelper {
         lsQueries.add(
             "CREATE TABLE IF NOT EXISTS " + TBL_PLATFORMS + " ("
                 + TBL_PLATFORMS_COL_ID + " INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, "
-                + TBL_PLATFORMS_COL_NAME + " TEXT NOT NULL"
+                + TBL_PLATFORMS_COL_NAME + " TEXT UNIQUE NOT NULL"
                 //+ "creationTime TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL, "
                 //+ "updateTime TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL"
             + ");"
@@ -155,7 +155,7 @@ public class DBHelper extends SQLiteOpenHelper {
      * @param p_title title object containing information about the game title
      * @return true - if the game title was successfully added to the db otherwise false
      */
-    public boolean addTitle(Title p_title) {
+    public long addTitle(Title p_title) {
         SQLiteDatabase db = getWritableDatabase();
         ContentValues cv = new ContentValues();
 
@@ -164,7 +164,7 @@ public class DBHelper extends SQLiteOpenHelper {
         cv.put(TBL_TITLES_COL_ON_WISH_LIST, p_title.isOnWishList());
         cv.put(TBL_TITLES_COL_LOCATION, p_title.getLocation());
 
-        boolean result = db.insert(TBL_TITLES, null, cv) != -1;
+        long result = db.insert(TBL_TITLES, null, cv);
         db.close();
 
         return result;
@@ -176,13 +176,37 @@ public class DBHelper extends SQLiteOpenHelper {
      * @param p_platform platform object containing information about the platform
      * @return true - if the platform was successfully added to the db otherwise false
      */
-    public boolean addPlatform(Platform p_platform) {
+    public long addPlatform(Platform p_platform) {
         SQLiteDatabase db = getWritableDatabase();
         ContentValues cv = new ContentValues();
 
         cv.put(TBL_PLATFORMS_COL_NAME, p_platform.getName());
 
-        boolean result = db.insert(TBL_PLATFORMS, null, cv) != -1;
+        long result = db.insert(TBL_PLATFORMS, null, cv);
+        db.close();
+
+        return result;
+    }
+
+    public long connectTitleAndPlatforms(Title p_title, List<Platform> p_lsPlatforms) {
+        SQLiteDatabase db = getWritableDatabase();
+        ContentValues cv = new ContentValues();
+
+        // Store title id so its just looked up once
+        int titleID = p_title.getId();
+
+        long result = -1;
+
+        // TODO: Only add if title and platform are not already connected
+        //
+        for (Platform p : p_lsPlatforms) {
+            cv.put(TBL_T_TBL_P_COL_TITLE_ID, titleID);
+            cv.put(TBL_T_TBL_P_COL_PLATFORM_ID, p.getId());
+
+            // Insert connection, but stop when there's an error
+            if (db.insert(TBL_T_TBL_P, null, cv) == -1) break;
+        }
+
         db.close();
 
         return result;
@@ -199,13 +223,15 @@ public class DBHelper extends SQLiteOpenHelper {
         // If cursor is not null
         if (cursor.moveToFirst()) {
             do {
-                int titleID = cursor.getInt(0);
-                String name = cursor.getString(1);
-                String thumbnail = cursor.getString(2);
                 boolean onWishList = cursor.getInt(3) == 1;
-                String location = cursor.getString(4);
 
-                lsTitles.add(new Title(name, thumbnail, onWishList, location));
+                lsTitles.add(new Title(
+                    cursor.getInt(0),
+                    cursor.getString(1),
+                    cursor.getString(2),
+                    onWishList,
+                    cursor.getString(4)
+                ));
             } while (cursor.moveToNext());
         }
 
