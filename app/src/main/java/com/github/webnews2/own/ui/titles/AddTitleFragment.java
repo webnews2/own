@@ -6,6 +6,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.text.TextUtils;
+import android.text.style.ImageSpan;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -13,13 +14,18 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.MultiAutoCompleteTextView;
 import android.widget.TextView;
 
+import androidx.appcompat.widget.AppCompatMultiAutoCompleteTextView;
+import androidx.appcompat.widget.LinearLayoutCompat;
 import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
@@ -29,13 +35,17 @@ import com.github.webnews2.own.R;
 import com.github.webnews2.own.utilities.DBHelper;
 import com.github.webnews2.own.utilities.Platform;
 import com.github.webnews2.own.utilities.Title;
+import com.google.android.material.button.MaterialButton;
 import com.google.android.material.chip.Chip;
+import com.google.android.material.chip.ChipDrawable;
 import com.google.android.material.chip.ChipGroup;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.textfield.MaterialAutoCompleteTextView;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.Collectors;
 
 import static android.app.Activity.RESULT_OK;
@@ -58,7 +68,7 @@ public class AddTitleFragment extends DialogFragment {
     private ImageButton ibChooseThumbnail;
     private TextInputEditText etGameTitle;
     private TextInputEditText etLocation;
-    private AutoCompleteTextView actvPlatforms;
+    private MaterialButton btnChoosePlatforms;
     private ChipGroup cgPlatforms;
 
     // TODO: Rename parameter arguments, choose names that match
@@ -133,8 +143,7 @@ public class AddTitleFragment extends DialogFragment {
         etGameTitle = (TextInputEditText) ilGameTitle.getEditText();
         TextInputLayout ilLocation = root.findViewById(R.id.ilLocation);
         etLocation = (TextInputEditText) ilLocation.getEditText();
-        TextInputLayout ilPlatforms = root.findViewById(R.id.ilPlatforms);
-        actvPlatforms = (MaterialAutoCompleteTextView) ilPlatforms.getEditText();
+        btnChoosePlatforms = root.findViewById(R.id.btnChoosePlatforms);
         cgPlatforms = root.findViewById(R.id.cgPlatforms);
 
         // Set up choose thumbnail functionality
@@ -176,31 +185,23 @@ public class AddTitleFragment extends DialogFragment {
             }
         });
 
-        // FIXME: List gets hidden by the keyboard, probably just a layout thingy
+        // CHECK: Add input chips combined with multi-autocomplete-textview instead of dialog
+        // TODO: Setup selection dialog for platforms
         // Set autocomplete suggestion list for platforms
         DBHelper dbh = DBHelper.getInstance(getContext());
         ArrayAdapter<String> adapter = new ArrayAdapter<>(
             getContext(),
-            android.R.layout.simple_list_item_1,
+            android.R.layout.simple_dropdown_item_1line,
             MainActivity.lsPlatforms.stream().map(Platform::getName).collect(Collectors.toList())
         );
-        actvPlatforms.setAdapter(adapter);
 
-        actvPlatforms.setImeOptions(EditorInfo.IME_ACTION_DONE);
-        actvPlatforms.setImeActionLabel("Add", EditorInfo.IME_ACTION_DONE); // in landscape - label action as add
-        actvPlatforms.setOnEditorActionListener(new AutoCompleteTextView.OnEditorActionListener() {
+        btnChoosePlatforms.setOnClickListener(new View.OnClickListener() {
             @Override
-            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-                if (actionId == EditorInfo.IME_ACTION_DONE) {
-                    // If entered platform exists in platforms list use that one instead
-                        // If entered platform is not already in chip group
-                            // Add it to chip group
-
-                    return true;
-                }
-                return false;
+            public void onClick(View v) {
+                Snackbar.make(root, "Choose button clicked.", Snackbar.LENGTH_LONG).show();
             }
         });
+
 
         return root;
     }
@@ -222,7 +223,7 @@ public class AddTitleFragment extends DialogFragment {
 
 
     private boolean saveData() {
-        // TODO: Only save when game title is entered and UNIQUE
+        // TODO: Only save when game title is entered and UNIQUE, else inform user about existence
 
         DBHelper dbh = DBHelper.getInstance(getContext());
         long titleID = dbh.addTitle(new Title(
@@ -234,10 +235,11 @@ public class AddTitleFragment extends DialogFragment {
         ));
 
         // TODO: For each chip in chipgroup > add to db if UNIQUE
-        long platformID = dbh.addPlatform(new Platform(-1, actvPlatforms.getText().toString().trim()));
+        //long platformID = dbh.addPlatform(new Platform(-1, actvPlatforms.getText().toString().trim()));
 
         // TODO: Associate titles and platforms
 
-        return titleID != -1 && platformID != -1;
+        //return titleID != -1 && platformID != -1;
+        return true;
     }
 }
