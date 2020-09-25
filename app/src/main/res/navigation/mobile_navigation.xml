@@ -19,6 +19,9 @@
         <action
             android:id="@+id/action_navigation_games_to_addTitlesFragment"
             app:destination="@id/addTitlesFragment" />
+        <action
+            android:id="@+id/action_navigation_games_to_platformsFragment"
+            app:destination="@id/platformsFragment" />
     </fragment>
 
     <fragment
@@ -30,6 +33,15 @@
     <fragment
         android:id="@+id/addTitlesFragment"
         android:name="com.github.webnews2.own.ui.titles.AddTitleFragment"
-        android:label="fragment_add_titles"
+        android:label="@string/title_add_title"
         tools:layout="@layout/fragment_add_title" />
+    <fragment
+        android:id="@+id/platformsFragment"
+        android:name="com.github.webnews2.own.ui.platforms.PlatformsFragment"
+        android:label="@string/title_platforms"
+        tools:layout="@layout/fragment_platforms" >
+        <action
+            android:id="@+id/action_platformsFragment_to_navigation_games"
+            app:destination="@id/navigation_games" />
+    </fragment>
 </navigation>

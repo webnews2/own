@@ -9,6 +9,10 @@
 
     <string name="title_add_title">Add title</string>
     <string name="action_save">Save</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="title_platforms">Platforms</string>
+    <string name="action_manage_platforms">Manage platforms</string>
 
 
 </resources>

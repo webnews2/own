@@ -1,6 +1,7 @@
 package com.github.webnews2.own.ui.titles;
 
 import android.app.Dialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -39,6 +40,7 @@ import com.google.android.material.button.MaterialButton;
 import com.google.android.material.chip.Chip;
 import com.google.android.material.chip.ChipDrawable;
 import com.google.android.material.chip.ChipGroup;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.textfield.MaterialAutoCompleteTextView;
 import com.google.android.material.textfield.TextInputEditText;
@@ -198,6 +200,29 @@ public class AddTitleFragment extends DialogFragment {
         btnChoosePlatforms.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                //String[] arrPlatforms = MainActivity.lsPlatforms.stream().map(Platform::getName).toArray(String[]::new);
+                String[] arrPlatforms = new String[] {"Playstation 3", "Xbox 360"};
+                boolean[] checkedPlatforms = new boolean[arrPlatforms.length];
+
+                new MaterialAlertDialogBuilder(getContext())
+                        .setTitle("Choose platforms")
+                        .setMultiChoiceItems(arrPlatforms, checkedPlatforms, new DialogInterface.OnMultiChoiceClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which, boolean isChecked) {
+                                checkedPlatforms[which] = isChecked;
+
+                                Chip platform = new Chip(getContext());
+                                platform.setCheckable(false);
+                                platform.setClickable(false);
+                                platform.setCloseIconVisible(false);
+                                platform.setText(arrPlatforms[which]);
+
+                                cgPlatforms.addView(platform);
+                            }
+                        })
+                        .show();
+
+
                 Snackbar.make(root, "Choose button clicked.", Snackbar.LENGTH_LONG).show();
             }
         });
