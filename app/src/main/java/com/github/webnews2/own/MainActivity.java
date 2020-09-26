@@ -1,5 +1,6 @@
 package com.github.webnews2.own;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.view.View;
 
@@ -50,5 +51,10 @@ public class MainActivity extends AppCompatActivity {
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
         return NavigationUI.navigateUp(navController, appBarConfiguration)
                 || super.onSupportNavigateUp();
+    }
+
+    public static void updatePlatforms(Context p_context) {
+        lsPlatforms.clear();
+        lsPlatforms.addAll(DBHelper.getInstance(p_context).getPlatforms());
     }
 }

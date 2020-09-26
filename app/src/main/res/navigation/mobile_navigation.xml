@@ -38,7 +38,7 @@
     <fragment
         android:id="@+id/platformsFragment"
         android:name="com.github.webnews2.own.ui.platforms.PlatformsFragment"
-        android:label="@string/title_platforms"
+        android:label="@string/platforms_title"
         tools:layout="@layout/fragment_platforms" >
         <action
             android:id="@+id/action_platformsFragment_to_navigation_games"

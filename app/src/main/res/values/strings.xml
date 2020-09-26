@@ -9,10 +9,14 @@
 
     <string name="title_add_title">Add title</string>
     <string name="action_save">Save</string>
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
-    <string name="title_platforms">Platforms</string>
-    <string name="action_manage_platforms">Manage platforms</string>
+
+
+    <!-- Platforms -->
+    <string name="platforms_title">Platforms</string>
+    <string name="platforms_action_manage">Manage platforms</string>
+    <string name="platforms_add">Add a new platform</string>
+    <string name="platforms_exists">The platform already exists.</string>
+    <string name="platforms_add_error">There was an error while adding the platform, please try again later.</string>
 
 
 </resources>

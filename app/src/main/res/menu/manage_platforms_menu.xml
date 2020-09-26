@@ -4,7 +4,7 @@
 
     <item
         android:id="@+id/action_manage_platforms"
-        android:title="@string/action_manage_platforms"
+        android:title="@string/platforms_action_manage"
         app:showAsAction="never" />
 
 </menu>

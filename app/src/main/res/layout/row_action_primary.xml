@@ -20,7 +20,7 @@
             android:layout_margin="16dp"
             android:background="@null"
             android:src="@drawable/ic_add_white_24dp"
-            android:tint="#60000000" />
+            android:tint="@color/color_light_grey" />
 
         <androidx.appcompat.widget.AppCompatEditText
             android:id="@+id/etActionFirst"
@@ -40,7 +40,7 @@
             android:layout_margin="16dp"
             android:background="@null"
             android:src="@drawable/ic_check_white_24dp"
-            android:tint="#66BB6A"
+            android:tint="@color/color_green"
             android:visibility="invisible" />
 
     </LinearLayout>
