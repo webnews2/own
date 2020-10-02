@@ -10,11 +10,11 @@ import androidx.appcompat.widget.AppCompatEditText;
 import androidx.appcompat.widget.AppCompatImageButton;
 
 import com.github.webnews2.own.R;
-import com.google.android.material.snackbar.Snackbar;
 
 import java.util.HashMap;
 
-// TODO: Improve performance, https://guides.codepath.com/android/Using-a-BaseAdapter-with-ListView
+// TODO: Fix UI state on scroll
+// DONE: Improve performance, https://guides.codepath.com/android/Using-a-BaseAdapter-with-ListView
 public class ActionRowAdapter extends BaseAdapter {
 
     private static class ViewHolder {
@@ -23,18 +23,24 @@ public class ActionRowAdapter extends BaseAdapter {
         AppCompatImageButton ibActionRight;
 
         public ViewHolder(View p_view) {
-
-
+            //
             ibActionLeft = p_view.findViewById(R.id.ibActionLeft);
             etAction = p_view.findViewById(R.id.etAction);
             ibActionRight = p_view.findViewById(R.id.ibActionRight);
-            View.OnClickListener myClickListener = new View.OnClickListener() {
+
+            ibActionRight.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    Snackbar.make(v, "Clicked at " + v.getTag(), Snackbar.LENGTH_LONG).show();
+                    View temp = (View) v.getParent();
+                    AppCompatEditText et = temp.findViewById(R.id.etAction);
+                    AppCompatImageButton ib = temp.findViewById(R.id.ibActionLeft);
+
+                    if (ib.getTag() == ibActionRight.getTag()) {
+                        ib.setVisibility(View.VISIBLE);
+                        et.setText(ib.getTag().toString());
+                    }
                 }
-            };
-            ibActionRight.setOnClickListener(myClickListener);
+            });
         }
 
     }
@@ -75,7 +81,11 @@ public class ActionRowAdapter extends BaseAdapter {
             vh = (ViewHolder) convertView.getTag();
         }
 
+
+        vh.ibActionLeft.setTag(position);
+        vh.etAction.setTag(position);
         vh.ibActionRight.setTag(position);
+
         vh.etAction.setText(getItem(position).toString());
 
         return convertView;

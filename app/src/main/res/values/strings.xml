@@ -10,6 +10,7 @@
     <string name="title_add_title">Add title</string>
     <string name="action_save">Save</string>
 
+    <string name="msg_field_required">This field can\'t be empty.</string>
 
     <!-- Platforms -->
     <string name="platforms_title">Platforms</string>
@@ -17,6 +18,7 @@
     <string name="platforms_add">Add a new platform</string>
     <string name="platforms_exists">The platform already exists.</string>
     <string name="platforms_add_error">There was an error while adding the platform, please try again later.</string>
+    <string name="platforms_update_error">There was an error while updating the platform, please try again later.</string>
 
 
 </resources>

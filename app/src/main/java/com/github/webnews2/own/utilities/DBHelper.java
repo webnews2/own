@@ -8,7 +8,6 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
-import java.sql.SQLInput;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -44,7 +43,7 @@ public class DBHelper extends SQLiteOpenHelper {
     private static final String TBL_T_TBL_P_COL_TITLE_ID = "titleID";
     private static final String TBL_T_TBL_P_COL_PLATFORM_ID = "platformID";
 
-
+    // Private constructor as this class uses the singleton pattern
     private DBHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
@@ -267,5 +266,81 @@ public class DBHelper extends SQLiteOpenHelper {
         cursor.close();
         db.close();
         return lsPlatforms;
+    }
+
+    /**
+     * Deletes a single title from the database by first deleting all associations (if it's not a wish list title) and
+     * second deleting the title itself.
+     *
+     * @param p_titleID ID of title to delete
+     * @param p_onWishList set to true if title is on wish list, false otherwise
+     * @return true - if title was successfully deleted (should only affect one row), false otherwise
+     */
+    public boolean deleteTitle(int p_titleID, boolean p_onWishList) {
+        // Get database with writing capabilities
+        SQLiteDatabase db = getWritableDatabase();
+
+        // If title is not on wish list > delete all associations of the title with any platform
+        if (!p_onWishList) db.delete(TBL_T_TBL_P, TBL_T_TBL_P_COL_TITLE_ID + "= ?",
+                new String[]{String.valueOf(p_titleID)});
+
+        // Delete the title itself
+        int count = db.delete(TBL_TITLES, TBL_TITLES_COL_ID + "= ?",
+                new String[]{String.valueOf(p_titleID)});
+
+        db.close();
+
+        // Returns true if operation was successful (means one row affected)
+        return count == 1;
+    }
+
+    /**
+     * Deletes a single platform from the database by first deleting all associations and second deleting the platform
+     * itself.
+     *
+     * @param p_platformID ID of platform to delete
+     * @return true - if platform was successfully deleted (should only affect one row), false otherwise
+     */
+    public boolean deletePlatform(int p_platformID) {
+        // Get database with writing capabilities
+        SQLiteDatabase db = getWritableDatabase();
+
+        // Delete all associations of the platform with any title
+        db.delete(TBL_T_TBL_P, TBL_T_TBL_P_COL_PLATFORM_ID + "= ?",
+                new String[]{String.valueOf(p_platformID)});
+
+        // Delete the platform itself
+        int count = db.delete(TBL_PLATFORMS, TBL_PLATFORMS_COL_ID + "= ?",
+                new String[]{String.valueOf(p_platformID)});
+
+        db.close();
+
+        // Returns true if operation was successful (means one row affected)
+        return count == 1;
+    }
+
+    /**
+     * Updates the name of a single platform.
+     *
+     * @param p_platformID ID of platform to update
+     * @param p_platformName new platform name
+     * @return true - if platform was successfully updated (should only affect one row), false otherwise
+     */
+    public boolean updatePlatform(int p_platformID, String p_platformName) {
+        // Get database with writing capabilities
+        SQLiteDatabase db = getWritableDatabase();
+
+        // Define set of values to update
+        ContentValues cv = new ContentValues();
+        cv.put(TBL_PLATFORMS_COL_NAME, p_platformName);
+
+        // Update platform
+        int count = db.update(TBL_PLATFORMS, cv, TBL_PLATFORMS_COL_ID + "= ?",
+                new String[]{String.valueOf(p_platformID)});
+
+        db.close();
+
+        // Returns true if operation was successful (means one row affected)
+        return count == 1;
     }
 }

@@ -1,6 +1,5 @@
 package com.github.webnews2.own.ui.platforms;
 
-import android.graphics.Color;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
@@ -15,12 +14,13 @@ import androidx.fragment.app.Fragment;
 
 import com.github.webnews2.own.MainActivity;
 import com.github.webnews2.own.R;
-import com.github.webnews2.own.utilities.ActionRowAdapter;
 import com.github.webnews2.own.utilities.DBHelper;
 import com.github.webnews2.own.utilities.Platform;
+import com.github.webnews2.own.utilities.PlatformsAdapter;
 import com.google.android.material.snackbar.Snackbar;
 
-import java.util.HashMap;
+import net.yslibrary.android.keyboardvisibilityevent.util.UIUtil;
+
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -80,18 +80,13 @@ public class PlatformsFragment extends Fragment {
         // Hide bottom navigation on this page
         getActivity().findViewById(R.id.nav_view).setVisibility(View.GONE);
 
-        // Set up adapter for list view by transforming the platforms list into a map
-        ActionRowAdapter actionRowAdapter = new ActionRowAdapter(
-                new HashMap<>(MainActivity.lsPlatforms
-                        .stream()
-                        .collect(Collectors.toMap(Platform::getId, Platform::getName))
-                ), getContext()
-        );
+        // Set up adapter for list view
+        PlatformsAdapter platformsAdapter = new PlatformsAdapter(MainActivity.lsPlatforms, getContext());
 
         // Set up list view by adding header and adapter
         ListView lvPlatforms = root.findViewById(R.id.lvPlatforms);
         lvPlatforms.addHeaderView(inflater.inflate(R.layout.row_action_primary, lvPlatforms, false), null, false);
-        lvPlatforms.setAdapter(actionRowAdapter);
+        lvPlatforms.setAdapter(platformsAdapter);
 
         // Find views in order to manipulate them
         AppCompatImageButton ibActionFirstLeft = lvPlatforms.findViewById(R.id.ibActionFirstLeft);
@@ -101,25 +96,25 @@ public class PlatformsFragment extends Fragment {
         // Set click method for button on left side of input UI > just handles UI changes
         ibActionFirstLeft.setOnClickListener(v -> {
             // If input field is focused > reset input UI by calling onFocusChange
-            if (etActionFirst.isFocused()) etActionFirst.clearFocus();
+            if (etActionFirst.isFocused()) {
+                etActionFirst.clearFocus();
+                UIUtil.hideKeyboard(getContext(), etActionFirst);
+            }
             // Otherwise input field will be focused
-            else etActionFirst.requestFocus();
+            else {
+                etActionFirst.requestFocus();
+                UIUtil.showKeyboard(getContext(), etActionFirst);
+            }
         });
 
         // Set hint > layout is used multiple times
         etActionFirst.setHint(R.string.platforms_add);
         // Set focus change method > just handles UI changes
         etActionFirst.setOnFocusChangeListener((v, hasFocus) -> {
-            /* FIXME: Open and close keyboard according to focus state > opening ends in multiple attempts to open it
-                https://stackoverflow.com/questions/5105354/how-to-show-soft-keyboard-when-edittext-is-focused */
-            //InputMethodManager imm = (InputMethodManager) getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
-
             // If input field is focused > enable "Add a new platform" UI
             if (hasFocus) {
                 ibActionFirstLeft.setImageResource(R.drawable.ic_close_white_24dp);
                 ibActionFirstLeft.setColorFilter(getResources().getColor(R.color.color_red, null));
-
-                //imm.toggleSoftInput(InputMethodManager.SHOW_IMPLICIT, 0);
 
                 ibActionFirstRight.setVisibility(View.VISIBLE);
             }
@@ -130,7 +125,6 @@ public class PlatformsFragment extends Fragment {
 
                 etActionFirst.setHint(R.string.platforms_add);
                 etActionFirst.setText(null);
-                //imm.toggleSoftInput(InputMethodManager.HIDE_IMPLICIT_ONLY, 0 );
 
                 ibActionFirstRight.setVisibility(View.INVISIBLE);
             }
@@ -160,7 +154,10 @@ public class PlatformsFragment extends Fragment {
                 String input = etActionFirst.getText().toString().trim();
 
                 // If input field is empty > reset input UI
-                if (TextUtils.isEmpty(input)) etActionFirst.clearFocus();
+                if (TextUtils.isEmpty(input)) {
+                    etActionFirst.clearFocus();
+                    UIUtil.hideKeyboard(getContext(), etActionFirst);
+                }
                 else {
                     // Check if platform already exists > gets added to list if true
                     List<Platform> lsContained = MainActivity.lsPlatforms.stream()
@@ -175,13 +172,10 @@ public class PlatformsFragment extends Fragment {
                         // If db operation was successful > update platforms list and reset input UI
                         if (platformID != -1) {
                             MainActivity.updatePlatforms(getContext());
-                            actionRowAdapter.updateData(new HashMap<>(
-                                    MainActivity.lsPlatforms
-                                    .stream()
-                                    .collect(Collectors.toMap(Platform::getId, Platform::getName))
-                            ));
+                            platformsAdapter.notifyDataSetChanged();
 
                             etActionFirst.clearFocus();
+                            UIUtil.hideKeyboard(getContext(), etActionFirst);
                         }
                         // Something went wrong while adding to db > inform user
                         else Snackbar.make(root, R.string.platforms_add_error, Snackbar.LENGTH_LONG).show();
