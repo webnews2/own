@@ -1,4 +1,4 @@
-package com.github.webnews2.own.utilities;
+package com.github.webnews2.own.utilities.adapters;
 
 import android.content.Context;
 import android.text.TextUtils;
@@ -13,6 +13,9 @@ import androidx.appcompat.widget.AppCompatImageButton;
 
 import com.github.webnews2.own.MainActivity;
 import com.github.webnews2.own.R;
+import com.github.webnews2.own.utilities.DBHelper;
+import com.github.webnews2.own.utilities.Platform;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.snackbar.Snackbar;
 
 import net.yslibrary.android.keyboardvisibilityevent.util.UIUtil;
@@ -20,8 +23,7 @@ import net.yslibrary.android.keyboardvisibilityevent.util.UIUtil;
 import java.util.List;
 import java.util.stream.Collectors;
 
-// TODO: Fix UI state on scroll
-// DONE: Improve performance, https://guides.codepath.com/android/Using-a-BaseAdapter-with-ListView
+
 public class PlatformsAdapter extends BaseAdapter {
 
     private static class ViewHolder {
@@ -53,7 +55,7 @@ public class PlatformsAdapter extends BaseAdapter {
 
     @Override
     public Platform getItem(int position) {
-        return lsPlatforms.get(position); // necessary as db ids don't start with zero
+        return lsPlatforms.get(position);
     }
 
     @Override
@@ -80,42 +82,60 @@ public class PlatformsAdapter extends BaseAdapter {
         if (vh.ibActionLeft.getVisibility() == View.VISIBLE) vh.ibActionLeft.setVisibility(View.INVISIBLE);
 
         // Set click method for button on left side of input UI > deletes platforms
-        vh.ibActionLeft.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // Show alert dialog informing user about deletion of possible connections and the platform itself
-            }
+        vh.ibActionLeft.setOnClickListener(v -> {
+            // Show alert dialog informing user about deletion of possible connections and the platform itself
+            new MaterialAlertDialogBuilder(context)
+                    .setTitle(R.string.platforms_delete_dialog_title)
+                    .setMessage(R.string.platforms_delete_dialog_msg)
+                    .setPositiveButton(R.string.lbl_delete, (dialog, which) -> {
+                        // Delete platform
+                        DBHelper dbh = DBHelper.getInstance(context);
+                        boolean deleted = dbh.deletePlatform(p.getId());
+
+                        // If db operation was successful > reload platforms list and reset input UI
+                        if (deleted) {
+                            MainActivity.updatePlatforms(context);
+                            notifyDataSetChanged();
+
+                            vh.etAction.clearFocus();
+                            UIUtil.hideKeyboard(context, v);
+                        }
+                        // Something went wrong while deleting platform > inform user
+                        else Snackbar.make(v, R.string.platforms_delete_error, Snackbar.LENGTH_LONG).show();
+                    })
+                    .setNegativeButton(R.string.lbl_cancel, (dialog, which) -> {
+                        // Reset input UI
+                        vh.etAction.clearFocus();
+                        UIUtil.hideKeyboard(context, v);
+                    })
+            .show();
         });
 
-        //vh.etAction.setTag(p);
         vh.etAction.setText(p.getName());
         // Set focus change method > just handles UI changes
-        vh.etAction.setOnFocusChangeListener(new View.OnFocusChangeListener() {
-            @Override
-            public void onFocusChange(View v, boolean hasFocus) {
-                // If input field is focused > enable update/delete UI
-                if (hasFocus) {
-                    vh.ibActionLeft.setVisibility(View.VISIBLE);
+        vh.etAction.setOnFocusChangeListener((v, hasFocus) -> {
+            // If input field is focused > enable update/delete UI
+            if (hasFocus) {
+                vh.ibActionLeft.setVisibility(View.VISIBLE);
 
-                    vh.ibActionRight.setImageResource(R.drawable.ic_check_white_24dp);
-                    vh.ibActionRight.setColorFilter(context.getResources().getColor(R.color.color_green, null));
-                }
-                // Input field is not focused > reset UI to initial state
-                else {
-                    vh.ibActionLeft.setVisibility(View.INVISIBLE);
+                vh.ibActionRight.setImageResource(R.drawable.ic_check_white_24dp);
+                vh.ibActionRight.setColorFilter(context.getResources().getColor(R.color.color_green, null));
+            }
+            // Input field is not focused > reset UI to initial state
+            else {
+                vh.ibActionLeft.setVisibility(View.INVISIBLE);
 
-                    vh.etAction.setText(p.getName());
+                vh.etAction.setText(p.getName());
 
-                    vh.ibActionRight.setImageResource(R.drawable.ic_edit_white_24dp);
-                    vh.ibActionRight.setColorFilter(context.getResources().getColor(R.color.color_light_grey, null));
-                }
+                vh.ibActionRight.setImageResource(R.drawable.ic_edit_white_24dp);
+                vh.ibActionRight.setColorFilter(context.getResources().getColor(R.color.color_light_grey, null));
             }
         });
 
         // Set soft input action button (bottom right) to done (tick)
         vh.etAction.setImeOptions(EditorInfo.IME_ACTION_DONE);
         // Set label for input action button, only visible in landscape mode
-        vh.etAction.setImeActionLabel("Update", EditorInfo.IME_ACTION_DONE);
+        vh.etAction.setImeActionLabel(context.getResources().getString(R.string.lbl_update), EditorInfo.IME_ACTION_DONE);
         // Set click method for input action button
         vh.etAction.setOnEditorActionListener((v, actionId, event) -> {
             // FIXME: Doesn't work when pressing ENTER on a hardware keyboard, low priority
@@ -141,7 +161,7 @@ public class PlatformsAdapter extends BaseAdapter {
                 // If input is current platform > reset input UI
                 else if (input.equals(p.getName())) {
                     vh.etAction.clearFocus();
-                    UIUtil.hideKeyboard(context, vh.etAction);
+                    UIUtil.hideKeyboard(context, v);
                 }
                 else {
                     // Check if platform already exists > gets added to list if true
@@ -160,7 +180,7 @@ public class PlatformsAdapter extends BaseAdapter {
                             notifyDataSetChanged();
 
                             vh.etAction.clearFocus();
-                            UIUtil.hideKeyboard(context, vh.etAction);
+                            UIUtil.hideKeyboard(context, v);
                         }
                         // Something went wrong while updating db > inform user
                         else Snackbar.make(v, R.string.platforms_update_error, Snackbar.LENGTH_LONG).show();

@@ -1,4 +1,4 @@
-package com.github.webnews2.own.utilities;
+package com.github.webnews2.own.utilities.adapters;
 
 import android.content.Context;
 import android.view.LayoutInflater;

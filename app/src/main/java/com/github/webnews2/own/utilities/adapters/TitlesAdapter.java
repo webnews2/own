@@ -1,8 +1,10 @@
-package com.github.webnews2.own.utilities;
+package com.github.webnews2.own.utilities.adapters;
 
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+
+import com.github.webnews2.own.utilities.Title;
 
 import java.util.ArrayList;
 

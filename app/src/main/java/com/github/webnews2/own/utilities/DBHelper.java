@@ -299,7 +299,7 @@ public class DBHelper extends SQLiteOpenHelper {
      * itself.
      *
      * @param p_platformID ID of platform to delete
-     * @return true - if platform was successfully deleted (should only affect one row), false otherwise
+     * @return true - if platform was successfully deleted, false otherwise
      */
     public boolean deletePlatform(int p_platformID) {
         // Get database with writing capabilities
@@ -316,6 +316,29 @@ public class DBHelper extends SQLiteOpenHelper {
         db.close();
 
         // Returns true if operation was successful (means one row affected)
+        return count == 1;
+    }
+
+    public boolean updateTitle(Title p_title) {
+        // Get database with writing capabilities
+        SQLiteDatabase db = getWritableDatabase();
+
+        // Define set of values to update
+        ContentValues cv = new ContentValues();
+        cv.put(TBL_TITLES_COL_NAME, p_title.getName());
+        cv.put(TBL_TITLES_COL_THUMBNAIL, p_title.getThumbnail());
+        cv.put(TBL_TITLES_COL_ON_WISH_LIST, p_title.isOnWishList());
+        cv.put(TBL_TITLES_COL_LOCATION, p_title.getLocation());
+
+        // TODO: Implement platforms update
+
+        // Update title
+        int count = db.update(TBL_TITLES, cv, TBL_TITLES_COL_ID + "= ?",
+                new String[]{String.valueOf(p_title.getId())});
+
+        db.close();
+
+        // Returns true if operation was successful
         return count == 1;
     }
 

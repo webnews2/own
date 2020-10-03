@@ -53,6 +53,11 @@ public class MainActivity extends AppCompatActivity {
                 || super.onSupportNavigateUp();
     }
 
+    public static void updateTitles(Context p_context) {
+        lsTitles.clear();
+        lsTitles.addAll(DBHelper.getInstance(p_context).getTitles());
+    }
+
     public static void updatePlatforms(Context p_context) {
         lsPlatforms.clear();
         lsPlatforms.addAll(DBHelper.getInstance(p_context).getPlatforms());

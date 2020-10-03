@@ -27,6 +27,9 @@ import com.google.android.material.snackbar.Snackbar;
 import java.util.ArrayList;
 import java.util.List;
 
+// TODO: Add details view, maybe as floating cardview
+// TODO: Add possibility to edit titles
+
 public class TitlesFragment extends Fragment {
 
     private List<String> lGames;

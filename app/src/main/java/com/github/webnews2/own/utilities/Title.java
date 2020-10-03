@@ -75,5 +75,5 @@ public class Title {
         lsPlatforms = p_lsPlatforms;
     }
 
-    // TODO: Implement method to get path of image for db ops
+    // TODO: Implement method to get image by path of thumbnail
 }

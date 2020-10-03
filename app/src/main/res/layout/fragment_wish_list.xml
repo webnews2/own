@@ -6,6 +6,16 @@
     android:layout_height="match_parent"
     tools:context=".ui.wish_list.WishListFragment">
 
-    <include layout="@layout/row_action_primary"/>
+    <ListView
+        android:id="@+id/lvWishList"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:divider="@null"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <!-- Primary and secondary rows get added and removed dynamically -->
+
+    </ListView>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
