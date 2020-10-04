@@ -11,9 +11,9 @@ import android.widget.BaseAdapter;
 import androidx.appcompat.widget.AppCompatEditText;
 import androidx.appcompat.widget.AppCompatImageButton;
 
-import com.github.webnews2.own.MainActivity;
 import com.github.webnews2.own.R;
 import com.github.webnews2.own.utilities.DBHelper;
+import com.github.webnews2.own.utilities.DataHolder;
 import com.github.webnews2.own.utilities.Platform;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.snackbar.Snackbar;
@@ -77,6 +77,7 @@ public class PlatformsAdapter extends BaseAdapter {
         }
 
         final Platform p = getItem(position);
+        DBHelper dbh = DBHelper.getInstance();
 
         // Hide left button on recycled views if it is visible
         if (vh.ibActionLeft.getVisibility() == View.VISIBLE) vh.ibActionLeft.setVisibility(View.INVISIBLE);
@@ -89,13 +90,11 @@ public class PlatformsAdapter extends BaseAdapter {
                     .setMessage(R.string.platforms_delete_dialog_msg)
                     .setPositiveButton(R.string.lbl_delete, (dialog, which) -> {
                         // Delete platform
-                        DBHelper dbh = DBHelper.getInstance(context);
                         boolean deleted = dbh.deletePlatform(p.getId());
 
                         // If db operation was successful > reload platforms list and reset input UI
                         if (deleted) {
-                            MainActivity.updatePlatforms(context);
-                            notifyDataSetChanged();
+                            DataHolder.getInstance().updatePlatforms(this);
 
                             vh.etAction.clearFocus();
                             UIUtil.hideKeyboard(context, v);
@@ -165,19 +164,17 @@ public class PlatformsAdapter extends BaseAdapter {
                 }
                 else {
                     // Check if platform already exists > gets added to list if true
-                    List<Platform> lsContained = MainActivity.lsPlatforms.stream()
+                    List<Platform> lsContained = DataHolder.getInstance().getPlatforms().stream()
                             .filter(platform -> platform.getName().equals(input)).collect(Collectors.toList());
 
                     // Platform doesn't exist
                     if (lsContained.size() < 1) {
                         // Update platform
-                        DBHelper dbh = DBHelper.getInstance(context);
                         boolean updated = dbh.updatePlatform(p.getId(), input);
 
                         // If db operation was successful > update platforms list and reset input UI
                         if (updated) {
-                            MainActivity.updatePlatforms(context);
-                            notifyDataSetChanged();
+                            DataHolder.getInstance().updatePlatforms(this);
 
                             vh.etAction.clearFocus();
                             UIUtil.hideKeyboard(context, v);

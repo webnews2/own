@@ -12,9 +12,9 @@ import androidx.appcompat.widget.AppCompatEditText;
 import androidx.appcompat.widget.AppCompatImageButton;
 import androidx.fragment.app.Fragment;
 
-import com.github.webnews2.own.MainActivity;
 import com.github.webnews2.own.R;
 import com.github.webnews2.own.utilities.DBHelper;
+import com.github.webnews2.own.utilities.DataHolder;
 import com.github.webnews2.own.utilities.Platform;
 import com.github.webnews2.own.utilities.adapters.PlatformsAdapter;
 import com.google.android.material.snackbar.Snackbar;
@@ -43,7 +43,7 @@ public class PlatformsFragment extends Fragment {
         getActivity().findViewById(R.id.nav_view).setVisibility(View.GONE);
 
         // Set up adapter for list view
-        PlatformsAdapter platformsAdapter = new PlatformsAdapter(MainActivity.lsPlatforms, getContext());
+        PlatformsAdapter platformsAdapter = new PlatformsAdapter(DataHolder.getInstance().getPlatforms(), getContext());
 
         // TODO: Remember adapter position > http://vikinghammer.com/2011/06/17/android-listview-maintain-your-scroll-position-when-you-refresh/
         // Set up list view by adding header and adapter
@@ -123,19 +123,17 @@ public class PlatformsFragment extends Fragment {
                 }
                 else {
                     // Check if platform already exists > gets added to list if true
-                    List<Platform> lsContained = MainActivity.lsPlatforms.stream()
+                    List<Platform> lsContained = DataHolder.getInstance().getPlatforms().stream()
                             .filter(platform -> platform.getName().equals(input)).collect(Collectors.toList());
 
                     // Platform doesn't exist
                     if (lsContained.size() < 1) {
                         // Add platform to db
-                        DBHelper dbh = DBHelper.getInstance(getContext());
-                        long platformID = dbh.addPlatform(new Platform(-1, input));
+                        long platformID = DBHelper.getInstance().addPlatform(new Platform(-1, input));
 
                         // If db operation was successful > update platforms list and reset input UI
                         if (platformID != -1) {
-                            MainActivity.updatePlatforms(getContext());
-                            platformsAdapter.notifyDataSetChanged();
+                            DataHolder.getInstance().updatePlatforms(platformsAdapter);
 
                             etActionFirst.clearFocus();
                             UIUtil.hideKeyboard(getContext(), etActionFirst);

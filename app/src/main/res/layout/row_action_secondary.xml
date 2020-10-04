@@ -32,7 +32,7 @@
             android:layout_weight="1"
             android:background="@null"
             android:maxLines="1"
-            android:inputType="text" />
+            android:inputType="textNoSuggestions" />
 
         <androidx.appcompat.widget.AppCompatImageButton
             android:id="@+id/ibActionRight"

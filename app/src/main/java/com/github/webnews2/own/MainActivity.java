@@ -22,19 +22,14 @@ public class MainActivity extends AppCompatActivity {
 
     private AppBarConfiguration appBarConfiguration;
 
-    public static List<Title> lsTitles;
-    public static List<Platform> lsPlatforms;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         BottomNavigationView navView = findViewById(R.id.nav_view);
 
-        // Get data from db
-        DBHelper dbh = DBHelper.getInstance(this);
-        lsTitles = new ArrayList<>(dbh.getTitles());
-        lsPlatforms = new ArrayList<>(dbh.getPlatforms());
+        // Initialize object in order to be able to work with the db
+        DBHelper.init(this);
 
         // Passing each menu ID as a set of Ids because each
         // menu should be considered as top level destinations.
@@ -51,15 +46,5 @@ public class MainActivity extends AppCompatActivity {
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
         return NavigationUI.navigateUp(navController, appBarConfiguration)
                 || super.onSupportNavigateUp();
-    }
-
-    public static void updateTitles(Context p_context) {
-        lsTitles.clear();
-        lsTitles.addAll(DBHelper.getInstance(p_context).getTitles());
-    }
-
-    public static void updatePlatforms(Context p_context) {
-        lsPlatforms.clear();
-        lsPlatforms.addAll(DBHelper.getInstance(p_context).getPlatforms());
     }
 }

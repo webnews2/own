@@ -11,9 +11,9 @@ import android.widget.BaseAdapter;
 import androidx.appcompat.widget.AppCompatEditText;
 import androidx.appcompat.widget.AppCompatImageButton;
 
-import com.github.webnews2.own.MainActivity;
 import com.github.webnews2.own.R;
 import com.github.webnews2.own.utilities.DBHelper;
+import com.github.webnews2.own.utilities.DataHolder;
 import com.github.webnews2.own.utilities.Title;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.snackbar.Snackbar;
@@ -75,6 +75,7 @@ public class WishListAdapter extends BaseAdapter {
         }
 
         final Title t = getItem(position);
+        DBHelper dbh = DBHelper.getInstance();
 
         // Hide left button on recycled views if it is visible
         if (vh.ibActionLeft.getVisibility() == View.VISIBLE) vh.ibActionLeft.setVisibility(View.INVISIBLE);
@@ -87,13 +88,11 @@ public class WishListAdapter extends BaseAdapter {
                     .setMessage(R.string.platforms_delete_dialog_msg)
                     .setPositiveButton(R.string.lbl_delete, (dialog, which) -> {
                         // Delete title
-                        DBHelper dbh = DBHelper.getInstance(context);
                         boolean deleted = dbh.deleteTitle(t.getId(), t.isOnWishList());
 
                         // If db operation was successful > reload wish list and reset input UI
                         if (deleted) {
-                            MainActivity.updateTitles(context);
-                            notifyDataSetChanged();
+                            DataHolder.getInstance().updateWishList(this);
 
                             vh.etAction.clearFocus();
                             UIUtil.hideKeyboard(context, vh.etAction);
@@ -164,7 +163,7 @@ public class WishListAdapter extends BaseAdapter {
                 }
                 else {
                     // Check if title already exists (no matter if as wish list or normal title) > gets added to list if true
-                    List<Title> lsContained = MainActivity.lsTitles.stream()
+                    List<Title> lsContained = DataHolder.getInstance().getWishList().stream()
                             .filter(title -> title.getName().equals(input)).collect(Collectors.toList());
 
                     // Title doesn't exist
@@ -173,13 +172,11 @@ public class WishListAdapter extends BaseAdapter {
                         t.setName(input);
 
                         // Update wish list title
-                        DBHelper dbh = DBHelper.getInstance(context);
                         boolean updated = dbh.updateTitle(t);
 
                         // If db operation was successful > update wish list and reset input UI
                         if (updated) {
-                            MainActivity.updateTitles(context);
-                            notifyDataSetChanged();
+                            DataHolder.getInstance().updateWishList(this);
 
                             vh.etAction.clearFocus();
                             UIUtil.hideKeyboard(context, v);

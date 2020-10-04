@@ -7,48 +7,33 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.text.TextUtils;
-import android.text.style.ImageSpan;
 import android.util.Log;
-import android.view.KeyEvent;
 import android.view.LayoutInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.inputmethod.EditorInfo;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.AutoCompleteTextView;
-import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.MultiAutoCompleteTextView;
-import android.widget.TextView;
 
-import androidx.appcompat.widget.AppCompatMultiAutoCompleteTextView;
-import androidx.appcompat.widget.LinearLayoutCompat;
 import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
 
-import com.github.webnews2.own.MainActivity;
 import com.github.webnews2.own.R;
 import com.github.webnews2.own.utilities.DBHelper;
+import com.github.webnews2.own.utilities.DataHolder;
 import com.github.webnews2.own.utilities.Platform;
 import com.github.webnews2.own.utilities.Title;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.chip.Chip;
-import com.google.android.material.chip.ChipDrawable;
 import com.google.android.material.chip.ChipGroup;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.snackbar.Snackbar;
-import com.google.android.material.textfield.MaterialAutoCompleteTextView;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static android.app.Activity.RESULT_OK;
 
@@ -190,41 +175,67 @@ public class AddTitleFragment extends DialogFragment {
         // CHECK: Add input chips combined with multi-autocomplete-textview instead of dialog
         // TODO: Setup selection dialog for platforms
         // Set autocomplete suggestion list for platforms
-        DBHelper dbh = DBHelper.getInstance(getContext());
+/*        DBHelper dbh = DBHelper.getInstance(getContext());
         ArrayAdapter<String> adapter = new ArrayAdapter<>(
             getContext(),
             android.R.layout.simple_dropdown_item_1line,
             MainActivity.lsPlatforms.stream().map(Platform::getName).collect(Collectors.toList())
-        );
+        );*/
 
-        btnChoosePlatforms.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                //String[] arrPlatforms = MainActivity.lsPlatforms.stream().map(Platform::getName).toArray(String[]::new);
-                String[] arrPlatforms = new String[] {"Playstation 3", "Xbox 360"};
-                boolean[] checkedPlatforms = new boolean[arrPlatforms.length];
+        String[] arrPlatforms = DataHolder.getInstance().getPlatforms().stream().map(Platform::getName).toArray(String[]::new);
+        boolean[] checkedPlatforms = new boolean[arrPlatforms.length];
+        List<Integer> lsContained = new ArrayList<>();
 
-                new MaterialAlertDialogBuilder(getContext())
-                        .setTitle("Choose platforms")
-                        .setMultiChoiceItems(arrPlatforms, checkedPlatforms, new DialogInterface.OnMultiChoiceClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which, boolean isChecked) {
-                                checkedPlatforms[which] = isChecked;
-
-                                Chip platform = new Chip(getContext());
-                                platform.setCheckable(false);
-                                platform.setClickable(false);
-                                platform.setCloseIconVisible(false);
-                                platform.setText(arrPlatforms[which]);
-
-                                cgPlatforms.addView(platform);
+        btnChoosePlatforms.setOnClickListener(v -> {
+            new MaterialAlertDialogBuilder(getContext())
+                .setTitle("Choose platforms")
+                .setMultiChoiceItems(arrPlatforms, checkedPlatforms, new DialogInterface.OnMultiChoiceClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which, boolean isChecked) {
+                        if (isChecked && !lsContained.contains(which)) lsContained.add(which);
+                        else lsContained.remove(which);
+                    }
+                })
+                .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        // Add/Remove platform to/from chip group according to selection
+                        for (int i = 0; i < checkedPlatforms.length; i++) {
+                            if (checkedPlatforms[i]) {
+                                // Platform checked > add to group if not in it
                             }
-                        })
-                        .show();
+                            else {
+                                // Platform unchecked > remove from group if in it
+                            }
+                        }
 
+                        // Add chip to chip group
+                            Chip platform = new Chip(getContext());
+                            platform.setCheckable(false);
+                            platform.setClickable(false);
+                            platform.setCloseIconVisible(false);
+                            platform.setText(arrPlatforms[which]);
 
-                Snackbar.make(root, "Choose button clicked.", Snackbar.LENGTH_LONG).show();
-            }
+                            cgPlatforms.addView(platform);
+                        // Remove chip from chip group
+                            cgPlatforms.removeViewAt(which);
+                    }
+                })
+                .setNegativeButton(R.string.lbl_cancel, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        // Reset current operation
+                    }
+                })
+                .setNeutralButton("Clear all", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        // Reset selection and clear chip group
+                        Arrays.fill(checkedPlatforms, false);
+                        cgPlatforms.removeAllViews();
+                    }
+                })
+                .show();
         });
 
 
@@ -250,7 +261,7 @@ public class AddTitleFragment extends DialogFragment {
     private boolean saveData() {
         // TODO: Only save when game title is entered and UNIQUE, else inform user about existence
 
-        DBHelper dbh = DBHelper.getInstance(getContext());
+        DBHelper dbh = DBHelper.getInstance();
         long titleID = dbh.addTitle(new Title(
                 -1,
                 etGameTitle.getText().toString().trim(),

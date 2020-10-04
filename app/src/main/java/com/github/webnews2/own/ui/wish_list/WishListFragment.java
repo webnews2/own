@@ -12,9 +12,9 @@ import androidx.appcompat.widget.AppCompatEditText;
 import androidx.appcompat.widget.AppCompatImageButton;
 import androidx.fragment.app.Fragment;
 
-import com.github.webnews2.own.MainActivity;
 import com.github.webnews2.own.R;
 import com.github.webnews2.own.utilities.DBHelper;
+import com.github.webnews2.own.utilities.DataHolder;
 import com.github.webnews2.own.utilities.Title;
 import com.github.webnews2.own.utilities.adapters.WishListAdapter;
 import com.google.android.material.snackbar.Snackbar;
@@ -37,7 +37,7 @@ public class WishListFragment extends Fragment {
         View root = inflater.inflate(R.layout.fragment_wish_list, container, false);
 
         // Set up adapter for list view
-        WishListAdapter wishListAdapter = new WishListAdapter(MainActivity.lsTitles, getContext());
+        WishListAdapter wishListAdapter = new WishListAdapter(DataHolder.getInstance().getWishList(), getContext());
 
         // TODO: see PlatformsFragment for more information
         // Set up list view by adding header and adapter
@@ -117,19 +117,17 @@ public class WishListFragment extends Fragment {
                 }
                 else {
                     // Check if title already exists (no matter if as wish list or normal title) > gets added to list if true
-                    List<Title> lsContained = MainActivity.lsTitles.stream()
+                    List<Title> lsContained = DataHolder.getInstance().getWishList().stream()
                             .filter(title -> title.getName().equals(input)).collect(Collectors.toList());
 
                     // Title doesn't exist
                     if (lsContained.size() < 1) {
                         // Add title to wish list
-                        DBHelper dbh = DBHelper.getInstance(getContext());
-                        long titleID = dbh.addTitle(new Title(-1, input, null, true, null));
+                        long titleID = DBHelper.getInstance().addTitle(new Title(-1, input, null, true, null));
 
                         // If db operation was successful > update wish list and reset input UI
                         if (titleID != -1) {
-                            MainActivity.updateTitles(getContext());
-                            wishListAdapter.notifyDataSetChanged();
+                            DataHolder.getInstance().updateWishList(wishListAdapter);
 
                             etActionFirst.clearFocus();
                             UIUtil.hideKeyboard(getContext(), etActionFirst);

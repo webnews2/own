@@ -49,14 +49,20 @@ public class DBHelper extends SQLiteOpenHelper {
     }
 
     /**
-     * Returns the DBHelper instance and if this one is not available it gets created once.
+     * Initializes the DBHelper instance if it's not available.
      *
      * @param p_context context to use for locating paths to the database
-     * @return an instance of the DBHelper class for interacting with the database
      */
-    public static DBHelper getInstance(Context p_context) {
+    public static void init(Context p_context) {
         if (instance == null) instance = new DBHelper(p_context);
+    }
 
+    /**
+     * Returns the DBHelper instance.
+     *
+     * @return instance of the DBHelper class for interacting with the database
+     */
+    public static DBHelper getInstance() {
         return instance;
     }
 
@@ -211,13 +217,13 @@ public class DBHelper extends SQLiteOpenHelper {
         return result;
     }
 
-    public List<Title> getTitles() {
+    public List<Title> getTitles(boolean p_onlyWishList) {
         List<Title> lsTitles = new ArrayList<>();
 
-        String query = "SELECT * FROM " + TBL_TITLES;
+        String query = "SELECT * FROM " + TBL_TITLES + " WHERE " + TBL_TITLES_COL_ON_WISH_LIST + "= ?";
 
         SQLiteDatabase db = getReadableDatabase();
-        Cursor cursor = db.rawQuery(query, null);
+        Cursor cursor = db.rawQuery(query, new String[]{p_onlyWishList ? "1" : "0"});
 
         // If cursor is not null
         if (cursor.moveToFirst()) {

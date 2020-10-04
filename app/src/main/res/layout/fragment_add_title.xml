@@ -156,14 +156,6 @@
                         android:paddingTop="8dp">
 
                         <!-- Chips are created via code -->
-                        <com.google.android.material.chip.Chip
-                            style="@style/Widget.MaterialComponents.Chip.Entry"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:checkable="false"
-                            android:clickable="false"
-                            android:text="Playstation 3"
-                            app:closeIconEnabled="false" />
 
                     </com.google.android.material.chip.ChipGroup>
 
