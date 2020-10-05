@@ -1,5 +1,6 @@
 package com.github.webnews2.own.ui.titles;
 
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -8,19 +9,16 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.BaseAdapter;
 import android.widget.ListView;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.ActionBar;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentTransaction;
 import androidx.navigation.Navigation;
 
 import com.github.webnews2.own.R;
-import com.github.webnews2.own.ui.platforms.PlatformsFragment;
+import com.github.webnews2.own.utilities.DataHolder;
+import com.github.webnews2.own.utilities.adapters.TitlesAdapter;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 
@@ -32,46 +30,32 @@ import java.util.List;
 
 public class TitlesFragment extends Fragment {
 
-    private List<String> lGames;
-
-    private ListView lvGames = null;
-    private ArrayAdapter<String> aaGames;
-
     public TitlesFragment() {
         // Required empty public constructor
     }
 
     public View onCreateView( LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
-
-        lGames = new ArrayList<>();
-        lGames.add("Fortnite");
-        lGames.add("Fallout 3");
-        lGames.add("Grand Theft Auto 5");
-
+        // Inflate the layout for this fragment
         View root = inflater.inflate(R.layout.fragment_titles, container, false);
 
+        // CHECK: There has to be a more elegant way of showing the bottom navigation
+        // Show bottom navigation on this page
         getActivity().findViewById(R.id.nav_view).setVisibility(View.VISIBLE);
 
-        lvGames = root.findViewById(R.id.lvGames);
+        // Set up adapter for list view
+        TitlesAdapter titlesAdapter = new TitlesAdapter(DataHolder.getInstance().getGames(), getContext());
 
-        // TODO: New adapter necessary
-//        aaGames = new ArrayAdapter<>(getContext(), R.layout.row, lGames);
-//
-//        lvGames.setAdapter(aaGames);
+        // Set up list view
+        ListView lvGames = root.findViewById(R.id.lvGames);
+        lvGames.setAdapter(titlesAdapter);
 
+        // Find FAB and set click method
         FloatingActionButton fab = root.findViewById(R.id.fabAddGame);
         fab.setOnClickListener(view -> {
-//                lGames.add("Test");
-//                aaGames.notifyDataSetChanged();
-//                Title test = new Title("Fortnite", null, false, null);
-//
-//                if (DBHelper.getInstance(getContext()).addGame(test)) {
-//                    Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-//                            .setAction("Action", null).show();
-//                }
-
-            AddTitleFragment newTitle = AddTitleFragment.newInstance("", "");
+            // Open new dialog fragment for adding a game title
+            AddTitleFragment newTitle = new AddTitleFragment();
+            newTitle.setOnDismissListener(dialog -> titlesAdapter.notifyDataSetChanged());
             newTitle.show(getChildFragmentManager(), "");
         });
 

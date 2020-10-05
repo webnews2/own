@@ -13,9 +13,11 @@
     <string name="msg_field_required">This field can\'t be empty.</string>
 
     <!-- Labels -->
+    <string name="lbl_ok">OK</string>
+    <string name="lbl_cancel">Cancel</string>
+    <string name="lbl_clear_all">Clear all</string>
     <string name="lbl_add">Add</string>
     <string name="lbl_update">Update</string>
-    <string name="lbl_cancel">Cancel</string>
     <string name="lbl_delete">Delete</string>
 
     <!-- Wish list -->
@@ -28,9 +30,14 @@
     <string name="wishlist_update_error">There was an error while updating the wish list title, please try again later.</string>
     <string name="wishlist_delete_error">There was an error while deleting the wish list title, please try again later.</string>
 
+    <!-- Games -->
+    <string name="games_add_error">There was an error while adding the game to your list, please try again later.</string>
+    <string name="games_connect_error">There was an error while connecting the game with the selected platforms, please try again later.</string>
+
     <!-- Platforms -->
     <string name="platforms_title">Platforms</string>
     <string name="platforms_action_manage">Manage platforms</string>
+    <string name="platforms_choose_dialog_title">Choose platforms</string>
     <string name="platforms_add">Add a new platform</string>
     <string name="platforms_exists">The platform already exists.</string>
     <string name="platforms_delete_dialog_title">Delete platform?</string>

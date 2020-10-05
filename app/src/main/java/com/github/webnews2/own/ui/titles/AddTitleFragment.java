@@ -9,14 +9,15 @@ import android.provider.MediaStore;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.DialogFragment;
-import androidx.fragment.app.Fragment;
 
 import com.github.webnews2.own.R;
 import com.github.webnews2.own.utilities.DBHelper;
@@ -33,16 +34,31 @@ import com.google.android.material.textfield.TextInputLayout;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import javax.net.ssl.SNIHostName;
 
 import static android.app.Activity.RESULT_OK;
 
-/**
- * A simple {@link Fragment} subclass.
- * Use the {@link AddTitleFragment#newInstance} factory method to
- * create an instance of this fragment.
- */
+
 public class AddTitleFragment extends DialogFragment {
+    private DialogInterface.OnDismissListener listener;
+
+    public void setOnDismissListener(DialogInterface.OnDismissListener p_listener) {
+        listener = p_listener;
+    }
+
+    @Override
+    public void onDismiss(@NonNull DialogInterface dialog) {
+        super.onDismiss(dialog);
+
+        if (listener != null) {
+            listener.onDismiss(dialog);
+        }
+    }
 
     // Tag for (logcat) information logging
     private static final String TAG = AddTitleFragment.class.getSimpleName();
@@ -58,42 +74,11 @@ public class AddTitleFragment extends DialogFragment {
     private MaterialButton btnChoosePlatforms;
     private ChipGroup cgPlatforms;
 
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
-
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
-
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment AddTitlesFragment.
-     */
-    // TODO: Rename and change types and number of parameters
-    public static AddTitleFragment newInstance(String param1, String param2) {
-        AddTitleFragment fragment = new AddTitleFragment();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);
-        return fragment;
-    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setStyle(DialogFragment.STYLE_NORMAL, R.style.AppTheme_FullScreenDialog);
-
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
-        }
     }
 
     @Override
@@ -117,9 +102,9 @@ public class AddTitleFragment extends DialogFragment {
         Toolbar toolbar = root.findViewById(R.id.toolbarAddTitles);
         toolbar.setNavigationOnClickListener(v -> dismiss());
         toolbar.setOnMenuItemClickListener(item -> {
-            saveData();
-            dismiss();
-            return true;
+            boolean ok = saveData(root);
+            if (ok) dismiss();
+            return ok;
         });
 
         // TODO: Implement events for text changes to prevent nulls
@@ -161,9 +146,9 @@ public class AddTitleFragment extends DialogFragment {
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
                 if (!hasFocus) {
-                    if (TextUtils.isEmpty(etGameTitle.getText())) { // CHECK: seems too obvious
+                    if (TextUtils.isEmpty(etGameTitle.getText().toString().trim())) { // CHECK: seems too obvious
                         // Show error message
-                        ilGameTitle.setError("Please enter a game title.");
+                        ilGameTitle.setError(getString(R.string.msg_field_required));
                     } else {
                         // Clear error message
                         ilGameTitle.setError(null);
@@ -172,62 +157,59 @@ public class AddTitleFragment extends DialogFragment {
             }
         });
 
-        // CHECK: Add input chips combined with multi-autocomplete-textview instead of dialog
-        // TODO: Setup selection dialog for platforms
-        // Set autocomplete suggestion list for platforms
-/*        DBHelper dbh = DBHelper.getInstance(getContext());
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(
-            getContext(),
-            android.R.layout.simple_dropdown_item_1line,
-            MainActivity.lsPlatforms.stream().map(Platform::getName).collect(Collectors.toList())
-        );*/
-
         String[] arrPlatforms = DataHolder.getInstance().getPlatforms().stream().map(Platform::getName).toArray(String[]::new);
         boolean[] checkedPlatforms = new boolean[arrPlatforms.length];
-        List<Integer> lsContained = new ArrayList<>();
+        HashMap<Integer, Boolean> mRecently = new HashMap<>();
 
         btnChoosePlatforms.setOnClickListener(v -> {
             new MaterialAlertDialogBuilder(getContext())
-                .setTitle("Choose platforms")
+                .setTitle(R.string.platforms_choose_dialog_title)
                 .setMultiChoiceItems(arrPlatforms, checkedPlatforms, new DialogInterface.OnMultiChoiceClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which, boolean isChecked) {
-                        if (isChecked && !lsContained.contains(which)) lsContained.add(which);
-                        else lsContained.remove(which);
+                        if (!mRecently.containsKey(which)) mRecently.put(which, isChecked);
+                        else mRecently.replace(which, isChecked);
                     }
                 })
-                .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                .setPositiveButton(R.string.lbl_ok, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         // Add/Remove platform to/from chip group according to selection
                         for (int i = 0; i < checkedPlatforms.length; i++) {
-                            if (checkedPlatforms[i]) {
+                            // Find platform chip by tag
+                            View v = cgPlatforms.findViewWithTag(arrPlatforms[i]);
+
+                            if (checkedPlatforms[i] && v == null) {
                                 // Platform checked > add to group if not in it
+                                Chip platform = new Chip(getContext());
+                                platform.setCheckable(false);
+                                platform.setClickable(false);
+                                platform.setCloseIconVisible(false);
+                                platform.setText(arrPlatforms[i]);
+                                platform.setTag(arrPlatforms[i]);
+                                cgPlatforms.addView(platform);
                             }
-                            else {
+                            else if (!checkedPlatforms[i] && v != null) {
                                 // Platform unchecked > remove from group if in it
+                                cgPlatforms.removeView(v);
                             }
                         }
 
-                        // Add chip to chip group
-                            Chip platform = new Chip(getContext());
-                            platform.setCheckable(false);
-                            platform.setClickable(false);
-                            platform.setCloseIconVisible(false);
-                            platform.setText(arrPlatforms[which]);
-
-                            cgPlatforms.addView(platform);
-                        // Remove chip from chip group
-                            cgPlatforms.removeViewAt(which);
+                        mRecently.clear();
                     }
                 })
                 .setNegativeButton(R.string.lbl_cancel, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         // Reset current operation
+                        for (Map.Entry<Integer, Boolean> e : mRecently.entrySet()) {
+                            checkedPlatforms[e.getKey()] = !e.getValue();
+                        }
+
+                        mRecently.clear();
                     }
                 })
-                .setNeutralButton("Clear all", new DialogInterface.OnClickListener() {
+                .setNeutralButton(R.string.lbl_clear_all, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         // Reset selection and clear chip group
@@ -235,7 +217,7 @@ public class AddTitleFragment extends DialogFragment {
                         cgPlatforms.removeAllViews();
                     }
                 })
-                .show();
+            .show();
         });
 
 
@@ -258,24 +240,69 @@ public class AddTitleFragment extends DialogFragment {
     }
 
 
-    private boolean saveData() {
-        // TODO: Only save when game title is entered and UNIQUE, else inform user about existence
+    private boolean saveData(View p_view) {
+        /* CHECK: There seems to be a bug. Sometimes when there are at least 2 trailing whitespaces
+                  getText() returns an empty string. Somehow this gets fixed by using the trim() method. */
+        String input = etGameTitle.getText().toString().trim();
 
-        DBHelper dbh = DBHelper.getInstance();
-        long titleID = dbh.addTitle(new Title(
-                -1,
-                etGameTitle.getText().toString().trim(),
-                uriThumbnail.toString(),
-                false,
-                TextUtils.isEmpty(etLocation.getText()) ? null : etLocation.getText().toString().trim()
-        ));
+        // If input field is empty
+        if (TextUtils.isEmpty(input)) {
+            etGameTitle.setError(getString(R.string.msg_field_required));
+        }
+        else {
+            // Check if game title already exists > gets added to list if true
+            List<Title> lsContained = DataHolder.getInstance().getTitles().stream()
+                    .filter(title -> title.getName().equals(input)).collect(Collectors.toList());
 
-        // TODO: For each chip in chipgroup > add to db if UNIQUE
-        //long platformID = dbh.addPlatform(new Platform(-1, actvPlatforms.getText().toString().trim()));
+            // Game title doesn't exist
+            if (lsContained.size() < 1) {
+                DBHelper dbh = DBHelper.getInstance();
 
-        // TODO: Associate titles and platforms
+                // Add game to owned games
+                long titleID = dbh.addTitle(new Title(
+                        -1,
+                        etGameTitle.getText().toString().trim(),
+                        (uriThumbnail == null) ? null : uriThumbnail.toString(),
+                        false,
+                        TextUtils.isEmpty(etLocation.getText().toString().trim()) ? null : etLocation.getText().toString().trim()
+                ));
 
-        //return titleID != -1 && platformID != -1;
-        return true;
+                // If game was successfully added > connect it with selected platforms
+                if (titleID != -1) {
+                    List<Platform> lsPlatforms = DataHolder.getInstance().getPlatforms();
+                    List<Platform> lsConnectTo = new ArrayList<>();
+
+                    // TODO: Find elegant solution for connecting games and platforms
+                    // Connect game and platforms, using chips from chip group
+/*                    for (int i = 0; i < cgPlatforms.getChildCount(); i++) {
+                        Chip c = (Chip) cgPlatforms.getChildAt(i);
+                        String tag = (String) c.getTag();
+                        Platform p = lsPlatforms.stream().filter(platform -> platform.getName().equals(tag)).collect(Collectors.toList());
+
+
+                        lsConnectTo.add(lsPlatforms.get(lsPlatforms.indexOf(tag)));
+                    }*/
+
+                    long connResult = dbh.connectTitleAndPlatforms(titleID, lsConnectTo);
+
+                    if (connResult != -1) {
+                        return true;
+                    }
+                    // Something went wrong while adding to db > inform user
+                    else Snackbar.make(p_view, R.string.games_connect_error, Snackbar.LENGTH_LONG).show();
+                }
+                // Something went wrong while adding to db > inform user
+                else Snackbar.make(p_view, R.string.games_add_error, Snackbar.LENGTH_LONG).show();
+            }
+            else {
+                // Get title out of list, there should only be one
+                Title t = lsContained.get(0);
+
+                // Distinguish between wish list and normal title
+                if (t.isOnWishList()) Snackbar.make(p_view, R.string.wishlist_title_exists, Snackbar.LENGTH_LONG).show();
+                else Snackbar.make(p_view, R.string.wishlist_title_owned, Snackbar.LENGTH_LONG).show();
+            }
+        }
+        return false;
     }
 }

@@ -40,6 +40,9 @@ public class PlatformsAdapter extends BaseAdapter {
 
     }
 
+    // Tag for (logcat) information logging
+    private static final String TAG = PlatformsAdapter.class.getSimpleName();
+
     private List<Platform> lsPlatforms;
     private Context context;
 
