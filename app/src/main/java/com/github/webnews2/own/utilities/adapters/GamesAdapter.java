@@ -13,7 +13,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.core.content.ContextCompat;
-import androidx.core.content.PermissionChecker;
 
 import com.bumptech.glide.Glide;
 import com.github.webnews2.own.R;
@@ -21,7 +20,7 @@ import com.github.webnews2.own.utilities.Title;
 
 import java.util.List;
 
-public class TitlesAdapter extends BaseAdapter {
+public class GamesAdapter extends BaseAdapter {
 
     private static class ViewHolder {
         private ImageView ivThumbnail;
@@ -35,24 +34,24 @@ public class TitlesAdapter extends BaseAdapter {
     }
 
     // Tag for (logcat) information logging
-    private static final String TAG = TitlesAdapter.class.getSimpleName();
+    private static final String TAG = GamesAdapter.class.getSimpleName();
 
-    private List<Title> lsTitles;
+    private List<Title> lsGames;
     private Context context;
 
-    public TitlesAdapter(List<Title> p_lsTitles, Context p_context) {
-        lsTitles = p_lsTitles;
+    public GamesAdapter(List<Title> p_lsGames, Context p_context) {
+        lsGames = p_lsGames;
         context = p_context;
     }
 
     @Override
     public int getCount() {
-        return lsTitles.size();
+        return lsGames.size();
     }
 
     @Override
     public Title getItem(int position) {
-        return lsTitles.get(position);
+        return lsGames.get(position);
     }
 
     @Override
@@ -80,8 +79,11 @@ public class TitlesAdapter extends BaseAdapter {
         boolean permGranted = ContextCompat.checkSelfPermission(context, Manifest.permission.READ_EXTERNAL_STORAGE)
                 == PackageManager.PERMISSION_GRANTED;
 
-        // Load image is permission is granted and image exists
-        if (permGranted && !TextUtils.isEmpty(thumbPath)) Glide.with(context).load(Uri.parse(thumbPath)).into(vh.ivThumbnail);
+        // If thumbnail path is not set > reset displayed image
+        if (TextUtils.isEmpty(thumbPath)) vh.ivThumbnail.setImageBitmap(null);
+        // If permission is granted and image exists > load image
+        else
+            if (permGranted) Glide.with(context).load(Uri.parse(thumbPath)).into(vh.ivThumbnail);
 
         vh.tvGameName.setText(t.getName());
 

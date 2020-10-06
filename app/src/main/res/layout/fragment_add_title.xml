@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ui.titles.AddTitleFragment">
+    tools:context=".ui.games.AddEditGameFragment">
 
     <com.google.android.material.appbar.AppBarLayout
         android:id="@+id/appbarAddTitles"
@@ -39,7 +39,6 @@
                 android:layout_marginStart="16dp"
                 android:layout_marginTop="16dp"
                 android:background="@drawable/ic_image_placeholder"
-                android:foreground="@drawable/shape_outline_rounded"
                 android:contentDescription="@string/iv_descr"
                 android:scaleType="centerCrop"
                 app:layout_constraintStart_toStartOf="parent"

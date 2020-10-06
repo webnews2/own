@@ -11,7 +11,13 @@ import android.util.Log;
 import java.util.ArrayList;
 import java.util.List;
 
-
+/**
+ * Helper class which contains all necessary methods for CRUD operations on the database of this application. It uses
+ * the singleton pattern and requires a single call of the init method to function properly.
+ *
+ * @author Kevin Kleiber (m26675)
+ * @version 1.0
+ */
 public class DBHelper extends SQLiteOpenHelper {
 
     // Tag for (logcat) information logging
@@ -49,7 +55,7 @@ public class DBHelper extends SQLiteOpenHelper {
     }
 
     /**
-     * Initializes the DBHelper instance if it's not available.
+     * Call this method ones to initialize the DBHelper instance if it's not available.
      *
      * @param p_context context to use for locating paths to the database
      */
@@ -58,7 +64,7 @@ public class DBHelper extends SQLiteOpenHelper {
     }
 
     /**
-     * Returns the DBHelper instance.
+     * Returns the DBHelper instance which can then be used for calling methods for different database operations.
      *
      * @return instance of the DBHelper class for interacting with the database
      */
@@ -122,7 +128,7 @@ public class DBHelper extends SQLiteOpenHelper {
             }
         }
         catch (SQLException e) {
-            Log.i(TAG, "{ojo} Something in onCreate went wrong.", e);
+            Log.e(TAG, "{ojo} Something in onCreate went wrong.", e);
         }
         finally {
             Log.i(TAG, "{ojo} Database and table creation was successful.");
@@ -158,17 +164,20 @@ public class DBHelper extends SQLiteOpenHelper {
      * Inserts a game title into the database. The name and the onWishList attribute must be present.
      *
      * @param p_title title object containing information about the game title
-     * @return true - if the game title was successfully added to the db otherwise false
+     * @return id of the recently inserted game title or -1 if failed
      */
     public long addTitle(Title p_title) {
+        // Get database with writing capabilities
         SQLiteDatabase db = getWritableDatabase();
-        ContentValues cv = new ContentValues();
 
+        // Define set of values to insert
+        ContentValues cv = new ContentValues();
         cv.put(TBL_TITLES_COL_NAME, p_title.getName());
         cv.put(TBL_TITLES_COL_THUMBNAIL, p_title.getThumbnail());
         cv.put(TBL_TITLES_COL_ON_WISH_LIST, p_title.isOnWishList());
         cv.put(TBL_TITLES_COL_LOCATION, p_title.getLocation());
 
+        // Insert title and close db afterwards
         long result = db.insert(TBL_TITLES, null, cv);
         db.close();
 
@@ -179,31 +188,44 @@ public class DBHelper extends SQLiteOpenHelper {
      * Inserts a platform into the database. The name attribute must be present.
      *
      * @param p_platform platform object containing information about the platform
-     * @return true - if the platform was successfully added to the db otherwise false
+     * @return id of the recently inserted platform or -1 if failed
      */
     public long addPlatform(Platform p_platform) {
+        // Get database with writing capabilities
         SQLiteDatabase db = getWritableDatabase();
-        ContentValues cv = new ContentValues();
 
+        // Define set of values to insert
+        ContentValues cv = new ContentValues();
         cv.put(TBL_PLATFORMS_COL_NAME, p_platform.getName());
 
+        // Insert platform and close db afterwards
         long result = db.insert(TBL_PLATFORMS, null, cv);
         db.close();
 
         return result;
     }
 
-    public long connectTitleAndPlatforms(long p_titleID, List<Platform> p_lsPlatforms) {
+    /**
+     * Inserts title <> platform connections into the database.
+     *
+     * @param p_titleID id of title to connect with platforms of list
+     * @param p_lsNewPlatforms list of new platforms to connect to title behind id
+     * @return id of the last inserted connection or -1 if failed
+     */
+    public long connectTitleAndPlatforms(long p_titleID, List<Platform> p_lsNewPlatforms) {
+        // Get database with writing capabilities
         SQLiteDatabase db = getWritableDatabase();
+        // Init set for connection insertion
         ContentValues cv = new ContentValues();
 
         long result = -1;
 
-        // TODO: Only add if title and platform are not already connected
-        //
-        for (Platform p : p_lsPlatforms) {
+        // TODO: Only add if title and platform are not already connected > requires platforms list of titles to be filled
+        // Loop through each platform of provided list
+        for (Platform p : p_lsNewPlatforms) {
+            // Set values for title <> platform connection
             cv.put(TBL_T_TBL_P_COL_TITLE_ID, p_titleID);
-            cv.put(TBL_T_TBL_P_COL_PLATFORM_ID, p.getId());
+            cv.put(TBL_T_TBL_P_COL_PLATFORM_ID, p.getID());
 
             // Insert connection, but stop when there's an error
             if ((result = db.insert(TBL_T_TBL_P, null, cv)) == -1) break;
@@ -214,12 +236,21 @@ public class DBHelper extends SQLiteOpenHelper {
         return result;
     }
 
+    /**
+     * Returns a list which contains all titles for the wish list or the games list. To get the combined list of both
+     * check the {@link DataHolder} class.
+     *
+     * @param p_onlyWishList true - if only wish list titles should be selected, false otherwise
+     * @return a List of type Title containing only wish list or games list titles
+     */
     public List<Title> getTitles(boolean p_onlyWishList) {
+        // Init list which will contain return values
         List<Title> lsTitles = new ArrayList<>();
-
+        // Define query for selecting titles of both the wish and games list
         String query = "SELECT * FROM " + TBL_TITLES + " WHERE " + TBL_TITLES_COL_ON_WISH_LIST + "= ?";
-
+        // Get database with reading capabilities
         SQLiteDatabase db = getReadableDatabase();
+        // Execute query selecting only wish list or games list results and storing result set in cursor
         Cursor cursor = db.rawQuery(query, new String[]{p_onlyWishList ? "1" : "0"});
 
         // If cursor is not null
@@ -227,6 +258,7 @@ public class DBHelper extends SQLiteOpenHelper {
             do {
                 boolean onWishList = cursor.getInt(3) == 1;
 
+                // Add each title of result set to result list
                 lsTitles.add(new Title(
                     cursor.getInt(0),
                     cursor.getString(1),
@@ -234,6 +266,8 @@ public class DBHelper extends SQLiteOpenHelper {
                     onWishList,
                     cursor.getString(4)
                 ));
+
+                // TODO: Get platforms associated with current title and set current title's platforms list
             } while (cursor.moveToNext());
         }
 
@@ -248,11 +282,13 @@ public class DBHelper extends SQLiteOpenHelper {
      * @return a List of type Platform containing all available platforms
      */
     public List<Platform> getPlatforms() {
+        // Init list which will contain return values
         List<Platform> lsPlatforms = new ArrayList<>();
-
+        // Define query for selecting all available platforms
         String query = "SELECT * FROM " + TBL_PLATFORMS;
-
+        // Get database with reading capabilities
         SQLiteDatabase db = getReadableDatabase();
+        // Execute query and store result set in cursor
         Cursor cursor = db.rawQuery(query, null);
 
         // If cursor is not null
@@ -275,19 +311,19 @@ public class DBHelper extends SQLiteOpenHelper {
      * Deletes a single title from the database by first deleting all associations (if it's not a wish list title) and
      * second deleting the title itself.
      *
-     * @param p_titleID ID of title to delete
-     * @param p_onWishList set to true if title is on wish list, false otherwise
-     * @return true - if title was successfully deleted (should only affect one row), false otherwise
+     * @param p_titleID id of title to delete
+     * @param p_onWishList true - if title is on wish list, false otherwise
+     * @return true - if title was successfully deleted, false otherwise
      */
     public boolean deleteTitle(int p_titleID, boolean p_onWishList) {
         // Get database with writing capabilities
         SQLiteDatabase db = getWritableDatabase();
 
-        // If title is not on wish list > delete all associations of the title with any platform
+        // If title is not on wish list > delete all associations of title with any platform
         if (!p_onWishList) db.delete(TBL_T_TBL_P, TBL_T_TBL_P_COL_TITLE_ID + "= ?",
                 new String[]{String.valueOf(p_titleID)});
 
-        // Delete the title itself
+        // Delete title itself
         int count = db.delete(TBL_TITLES, TBL_TITLES_COL_ID + "= ?",
                 new String[]{String.valueOf(p_titleID)});
 
@@ -298,10 +334,10 @@ public class DBHelper extends SQLiteOpenHelper {
     }
 
     /**
-     * Deletes a single platform from the database by first deleting all associations and second deleting the platform
-     * itself.
+     * Deletes a single platform from the database by first deleting all associations with titles and second deleting
+     * the platform itself.
      *
-     * @param p_platformID ID of platform to delete
+     * @param p_platformID id of platform to delete
      * @return true - if platform was successfully deleted, false otherwise
      */
     public boolean deletePlatform(int p_platformID) {
@@ -322,6 +358,12 @@ public class DBHelper extends SQLiteOpenHelper {
         return count == 1;
     }
 
+    /**
+     * Updates a single title using the provided title object to access the values for updating it.
+     *
+     * @param p_title title object with title id to update and updated values
+     * @return true - if title was successfully updated, false otherwise
+     */
     public boolean updateTitle(Title p_title) {
         // Get database with writing capabilities
         SQLiteDatabase db = getWritableDatabase();
@@ -333,15 +375,15 @@ public class DBHelper extends SQLiteOpenHelper {
         cv.put(TBL_TITLES_COL_ON_WISH_LIST, p_title.isOnWishList());
         cv.put(TBL_TITLES_COL_LOCATION, p_title.getLocation());
 
-        // TODO: Implement platforms update
+        // TODO: Implement update for associated platforms
 
         // Update title
         int count = db.update(TBL_TITLES, cv, TBL_TITLES_COL_ID + "= ?",
-                new String[]{String.valueOf(p_title.getId())});
+                new String[]{String.valueOf(p_title.getID())});
 
         db.close();
 
-        // Returns true if operation was successful
+        // Returns true if operation was successful (means one row affected)
         return count == 1;
     }
 
@@ -350,7 +392,7 @@ public class DBHelper extends SQLiteOpenHelper {
      *
      * @param p_platformID ID of platform to update
      * @param p_platformName new platform name
-     * @return true - if platform was successfully updated (should only affect one row), false otherwise
+     * @return true - if platform was successfully updated, false otherwise
      */
     public boolean updatePlatform(int p_platformID, String p_platformName) {
         // Get database with writing capabilities

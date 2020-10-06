@@ -13,7 +13,7 @@
 
     <fragment
         android:id="@+id/navigation_games"
-        android:name="com.github.webnews2.own.ui.titles.TitlesFragment"
+        android:name="com.github.webnews2.own.ui.games.GamesFragment"
         android:label="@string/title_games"
         tools:layout="@layout/fragment_titles" >
         <action
@@ -32,7 +32,7 @@
 
     <fragment
         android:id="@+id/addTitlesFragment"
-        android:name="com.github.webnews2.own.ui.titles.AddTitleFragment"
+        android:name="com.github.webnews2.own.ui.games.AddEditGameFragment"
         android:label="@string/title_add_title"
         tools:layout="@layout/fragment_add_title" />
     <fragment

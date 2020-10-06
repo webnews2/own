@@ -93,7 +93,7 @@ public class PlatformsAdapter extends BaseAdapter {
                     .setMessage(R.string.platforms_delete_dialog_msg)
                     .setPositiveButton(R.string.lbl_delete, (dialog, which) -> {
                         // Delete platform
-                        boolean deleted = dbh.deletePlatform(p.getId());
+                        boolean deleted = dbh.deletePlatform(p.getID());
 
                         // If db operation was successful > reload platforms list and reset input UI
                         if (deleted) {
@@ -173,7 +173,7 @@ public class PlatformsAdapter extends BaseAdapter {
                     // Platform doesn't exist
                     if (lsContained.size() < 1) {
                         // Update platform
-                        boolean updated = dbh.updatePlatform(p.getId(), input);
+                        boolean updated = dbh.updatePlatform(p.getID(), input);
 
                         // If db operation was successful > update platforms list and reset input UI
                         if (updated) {

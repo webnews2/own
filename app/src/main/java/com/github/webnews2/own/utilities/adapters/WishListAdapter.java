@@ -38,22 +38,22 @@ public class WishListAdapter extends BaseAdapter {
         }
     }
 
-    private List<Title> lsTitles;
+    private List<Title> lsGames;
     private Context context;
 
-    public WishListAdapter(List<Title> p_lsTitles, Context p_context) {
-        lsTitles = p_lsTitles;
+    public WishListAdapter(List<Title> p_lsGames, Context p_context) {
+        lsGames = p_lsGames;
         context = p_context;
     }
 
     @Override
     public int getCount() {
-        return lsTitles.size();
+        return lsGames.size();
     }
 
     @Override
     public Title getItem(int position) {
-        return lsTitles.get(position);
+        return lsGames.get(position);
     }
 
     @Override
@@ -82,13 +82,13 @@ public class WishListAdapter extends BaseAdapter {
 
         // Set click method for button on left side of input UI > deletes wish list title
         vh.ibActionLeft.setOnClickListener(v -> {
-            // Show alert dialog informing user about deletion of possible connections with platforms and title itself
+            // Show alert dialog informing user about deletion of title itself
             new MaterialAlertDialogBuilder(context)
                     .setTitle(R.string.wishlist_delete_dialog_title)
-                    .setMessage(R.string.platforms_delete_dialog_msg)
+                    .setMessage(R.string.wishlist_delete_dialog_msg)
                     .setPositiveButton(R.string.lbl_delete, (dialog, which) -> {
                         // Delete title
-                        boolean deleted = dbh.deleteTitle(t.getId(), t.isOnWishList());
+                        boolean deleted = dbh.deleteTitle(t.getID(), t.isOnWishList());
 
                         // If db operation was successful > reload wish list and reset input UI
                         if (deleted) {

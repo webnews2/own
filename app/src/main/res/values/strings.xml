@@ -25,14 +25,17 @@
     <string name="wishlist_title_exists">This title is already on your wish list.</string>
     <string name="wishlist_title_owned">You already own this title. Check your games.</string>
     <string name="wishlist_delete_dialog_title">Delete wish list title?</string>
-    <string name="wishlist_delete_dialog_msg">This wish list title and all associations with platforms will be deleted. The affected platforms won\'t be deleted.</string>
+    <string name="wishlist_delete_dialog_msg">This wish list title will be deleted.</string>
     <string name="wishlist_add_error">There was an error while adding the title to your wish list, please try again later.</string>
     <string name="wishlist_update_error">There was an error while updating the wish list title, please try again later.</string>
     <string name="wishlist_delete_error">There was an error while deleting the wish list title, please try again later.</string>
 
     <!-- Games -->
+    <string name="games_delete_dialog_title">Delete game?</string>
+    <string name="games_delete_dialog_msg">This game and all associations with platforms will be deleted. The affected platforms won\'t be deleted.</string>
     <string name="games_add_error">There was an error while adding the game to your list, please try again later.</string>
     <string name="games_connect_error">There was an error while connecting the game with the selected platforms, please try again later.</string>
+    <string name="games_delete_error">There was an error while deleting the game, please try again later.</string>
 
     <!-- Platforms -->
     <string name="platforms_title">Platforms</string>
@@ -41,7 +44,7 @@
     <string name="platforms_add">Add a new platform</string>
     <string name="platforms_exists">The platform already exists.</string>
     <string name="platforms_delete_dialog_title">Delete platform?</string>
-    <string name="platforms_delete_dialog_msg">This platform and all associations with titles will be deleted. The affected titles won\'t be deleted.</string>
+    <string name="platforms_delete_dialog_msg">This platform and all associations with games will be deleted. The affected games won\'t be deleted.</string>
     <string name="platforms_add_error">There was an error while adding the platform, please try again later.</string>
     <string name="platforms_update_error">There was an error while updating the platform, please try again later.</string>
     <string name="platforms_delete_error">There was an error while deleting the platform, please try again later.</string>

@@ -1,18 +1,14 @@
-package com.github.webnews2.own.ui.titles;
+package com.github.webnews2.own.ui.games;
 
 import android.Manifest;
 import android.app.Dialog;
-import android.content.ContentResolver;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.ParcelFileDescriptor;
 import android.provider.MediaStore;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -38,8 +34,6 @@ import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 
-import java.io.FileDescriptor;
-import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -50,7 +44,7 @@ import java.util.stream.Collectors;
 import static android.app.Activity.RESULT_OK;
 
 
-public class AddTitleFragment extends DialogFragment {
+public class AddEditGameFragment extends DialogFragment {
     private DialogInterface.OnDismissListener listener;
 
     public void setOnDismissListener(DialogInterface.OnDismissListener p_listener) {
@@ -67,7 +61,7 @@ public class AddTitleFragment extends DialogFragment {
     }
 
     // Tag for (logcat) information logging
-    private static final String TAG = AddTitleFragment.class.getSimpleName();
+    private static final String TAG = AddEditGameFragment.class.getSimpleName();
 
     private static final int PICKED_IMAGE = 1;
     private static final int STORAGE_PERMISSION_CODE = 1;
@@ -76,6 +70,7 @@ public class AddTitleFragment extends DialogFragment {
     private ImageView ivThumbnail;
     private Uri uriThumbnail;
     private ImageButton ibChooseThumbnail;
+    private TextInputLayout ilGameTitle;
     private TextInputEditText etGameTitle;
     private TextInputEditText etLocation;
     private MaterialButton btnChoosePlatforms;
@@ -118,7 +113,7 @@ public class AddTitleFragment extends DialogFragment {
         // Set member vars of ui elements
         ivThumbnail = root.findViewById(R.id.ivThumbnail);
         ibChooseThumbnail = root.findViewById(R.id.ibChooseThumbnail);
-        TextInputLayout ilGameTitle = root.findViewById(R.id.ilGameTitle);
+        ilGameTitle = root.findViewById(R.id.ilGameTitle);
         etGameTitle = (TextInputEditText) ilGameTitle.getEditText();
         TextInputLayout ilLocation = root.findViewById(R.id.ilLocation);
         etLocation = (TextInputEditText) ilLocation.getEditText();
@@ -295,7 +290,7 @@ public class AddTitleFragment extends DialogFragment {
 
         // If input field is empty
         if (TextUtils.isEmpty(input)) {
-            etGameTitle.setError(getString(R.string.msg_field_required));
+            ilGameTitle.setError(getString(R.string.msg_field_required));
         }
         else {
             // Check if game title already exists > gets added to list if true
@@ -305,6 +300,9 @@ public class AddTitleFragment extends DialogFragment {
             // Game title doesn't exist
             if (lsContained.size() < 1) {
                 DBHelper dbh = DBHelper.getInstance();
+
+                // if platforms selected
+                    // set up platform connections list
 
                 // Add game to owned games
                 long titleID = dbh.addTitle(new Title(
@@ -317,26 +315,30 @@ public class AddTitleFragment extends DialogFragment {
 
                 // If game was successfully added > connect it with selected platforms
                 if (titleID != -1) {
-                    // TODO: Add check for added platforms
-                    List<Platform> lsPlatforms = DataHolder.getInstance().getPlatforms();
-                    List<Platform> lsConnectTo = new ArrayList<>();
+                    // If at least one platform was selected
+                    if (cgPlatforms.getChildCount() >= 1) {
+                        List<Platform> lsPlatforms = DataHolder.getInstance().getPlatforms();
+                        List<Platform> lsConnectTo = new ArrayList<>();
 
-                    // TODO: Find elegant solution for connecting games and platforms
-                    // Connect game and platforms, using chips from chip group
-                    for (int i = 0; i < cgPlatforms.getChildCount(); i++) {
-                        Chip c = (Chip) cgPlatforms.getChildAt(i);
-                        String tag = (String) c.getTag();
-                        Platform p = lsPlatforms.stream().filter(platform -> platform.getName().equals(tag)).findFirst().orElse(null);
-                        if (p != null) lsConnectTo.add(p);
+                        // TODO: Find elegant solution for connecting games and platforms
+                        // Connect game and platforms, using chips from chip group
+                        for (int i = 0; i < cgPlatforms.getChildCount(); i++) {
+                            Chip c = (Chip) cgPlatforms.getChildAt(i);
+                            String tag = (String) c.getTag();
+                            Platform p = lsPlatforms.stream().filter(platform -> platform.getName().equals(tag)).findFirst().orElse(null);
+                            if (p != null) lsConnectTo.add(p);
+                        }
+
+                        long connResult = dbh.connectTitleAndPlatforms(titleID, lsConnectTo);
+
+                        if (connResult != -1) {
+                            return true;
+                        }
+                        // Something went wrong while adding to db > inform user
+                        else Snackbar.make(p_view, R.string.games_connect_error, Snackbar.LENGTH_LONG).show();
                     }
-
-                    long connResult = dbh.connectTitleAndPlatforms(titleID, lsConnectTo);
-
-                    if (connResult != -1) {
-                        return true;
-                    }
-                    // Something went wrong while adding to db > inform user
-                    else Snackbar.make(p_view, R.string.games_connect_error, Snackbar.LENGTH_LONG).show();
+                    // No platform selected > everything's fine
+                    else return true;
                 }
                 // Something went wrong while adding to db > inform user
                 else Snackbar.make(p_view, R.string.games_add_error, Snackbar.LENGTH_LONG).show();
