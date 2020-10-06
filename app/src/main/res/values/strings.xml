@@ -46,5 +46,9 @@
     <string name="platforms_update_error">There was an error while updating the platform, please try again later.</string>
     <string name="platforms_delete_error">There was an error while deleting the platform, please try again later.</string>
 
+    <!-- Permissions -->
+    <string name="perms_denied">The permission for this action was denied.</string>
+    <string name="perms_request_dialog_title">Permission request</string>
+    <string name="perms_request_dialog_storage_descr">The permission for storage access is needed to access images from your phone to display them in your games list.\n\nIf you deny the permission this time permanently you need to grant it through the app settings.</string>
 
 </resources>

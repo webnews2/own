@@ -1,15 +1,19 @@
 package com.github.webnews2.own.ui.titles;
 
+import android.Manifest;
 import android.app.Dialog;
+import android.content.ContentResolver;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.ParcelFileDescriptor;
 import android.provider.MediaStore;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
@@ -17,8 +21,10 @@ import android.widget.ImageView;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.DialogFragment;
 
+import com.bumptech.glide.Glide;
 import com.github.webnews2.own.R;
 import com.github.webnews2.own.utilities.DBHelper;
 import com.github.webnews2.own.utilities.DataHolder;
@@ -32,14 +38,14 @@ import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 
+import java.io.FileDescriptor;
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-
-import javax.net.ssl.SNIHostName;
 
 import static android.app.Activity.RESULT_OK;
 
@@ -64,6 +70,7 @@ public class AddTitleFragment extends DialogFragment {
     private static final String TAG = AddTitleFragment.class.getSimpleName();
 
     private static final int PICKED_IMAGE = 1;
+    private static final int STORAGE_PERMISSION_CODE = 1;
 
     // Member vars
     private ImageView ivThumbnail;
@@ -120,23 +127,33 @@ public class AddTitleFragment extends DialogFragment {
 
         // Set up choose thumbnail functionality
         ibChooseThumbnail.setOnClickListener(v -> {
-            // Create action to get image from an external app activity
-            Intent get = new Intent(Intent.ACTION_GET_CONTENT);
-            get.setType("image/*");
-
-            // This will enable the user to pick the application for choosing the image
-            Intent pick = new Intent(Intent.ACTION_PICK);
-            pick.setDataAndType(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, "image/*"); // external to access shareable media
-
-            // TODO: Add comment
-            Intent choose = Intent.createChooser(get, "Select Image");
-            choose.putExtra(Intent.EXTRA_INITIAL_INTENTS, new Intent[] {pick});
-
-            // Check if there are activities which can handle the request
-            if (choose.resolveActivity(getActivity().getPackageManager()) != null) {
-                startActivityForResult(choose, PICKED_IMAGE);
-            } else {
-                Snackbar.make(root, "No suitable app was found.", Snackbar.LENGTH_LONG).show();
+            if (ContextCompat.checkSelfPermission(getContext(), Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
+                // Let user do selection
+                selectThumbnail();
+            }
+            else {
+                if (shouldShowRequestPermissionRationale(Manifest.permission.READ_EXTERNAL_STORAGE)) {
+                    // User denied permission before, now tries to access it again therefore explain why it's necessary
+                    new MaterialAlertDialogBuilder(getContext())
+                            .setTitle(R.string.perms_request_dialog_title)
+                            .setMessage(R.string.perms_request_dialog_storage_descr)
+                            .setPositiveButton(R.string.lbl_ok, new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, STORAGE_PERMISSION_CODE);
+                                }
+                            })
+                            .setNegativeButton(R.string.lbl_cancel, new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    dialog.dismiss();
+                                }
+                            })
+                    .show();
+                }
+                else {
+                    requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, STORAGE_PERMISSION_CODE);
+                }
             }
         });
 
@@ -231,14 +248,45 @@ public class AddTitleFragment extends DialogFragment {
         if (requestCode == PICKED_IMAGE && resultCode == RESULT_OK) {
             // Store uri of image and set image of image view
             uriThumbnail = data.getData();
-            ivThumbnail.setImageURI(uriThumbnail); // only for local images
-        }
-        else {
-            Log.e(TAG, "{ojo} Something went wrong during the image selection!");
-            return;
+            if (uriThumbnail != null) Glide.with(this).load(uriThumbnail).into(ivThumbnail);
         }
     }
 
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        if (requestCode == STORAGE_PERMISSION_CODE) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                // Permission was granted
+                selectThumbnail();
+            }
+            else {
+                // Permission was denied
+                Snackbar.make(getView(), R.string.perms_denied, Snackbar.LENGTH_LONG).show();
+            }
+        }
+    }
+
+    private void selectThumbnail() {
+        // Create action to get image from an external app activity
+        Intent get = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+        get.setType("image/*");
+
+        // This will enable the user to pick one of the available image providing applications
+        Intent pick = new Intent(Intent.ACTION_PICK);
+        pick.setDataAndType(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, "image/*"); // external to access shareable media
+
+        // Creates intent which lets user choose the app for selecting an image (looks a lot like a modal)
+        Intent choose = Intent.createChooser(get, "Select Image");
+        choose.putExtra(Intent.EXTRA_INITIAL_INTENTS, new Intent[] {pick});
+
+        // Check if there are activities which can handle the request
+        if (choose.resolveActivity(getActivity().getPackageManager()) != null) {
+            startActivityForResult(Intent.createChooser(choose, "Select Image"), PICKED_IMAGE);
+        } else {
+            Snackbar.make(getView(), "No suitable app was found.", Snackbar.LENGTH_LONG).show();
+        }
+    }
 
     private boolean saveData(View p_view) {
         /* CHECK: There seems to be a bug. Sometimes when there are at least 2 trailing whitespaces
@@ -269,19 +317,18 @@ public class AddTitleFragment extends DialogFragment {
 
                 // If game was successfully added > connect it with selected platforms
                 if (titleID != -1) {
+                    // TODO: Add check for added platforms
                     List<Platform> lsPlatforms = DataHolder.getInstance().getPlatforms();
                     List<Platform> lsConnectTo = new ArrayList<>();
 
                     // TODO: Find elegant solution for connecting games and platforms
                     // Connect game and platforms, using chips from chip group
-/*                    for (int i = 0; i < cgPlatforms.getChildCount(); i++) {
+                    for (int i = 0; i < cgPlatforms.getChildCount(); i++) {
                         Chip c = (Chip) cgPlatforms.getChildAt(i);
                         String tag = (String) c.getTag();
-                        Platform p = lsPlatforms.stream().filter(platform -> platform.getName().equals(tag)).collect(Collectors.toList());
-
-
-                        lsConnectTo.add(lsPlatforms.get(lsPlatforms.indexOf(tag)));
-                    }*/
+                        Platform p = lsPlatforms.stream().filter(platform -> platform.getName().equals(tag)).findFirst().orElse(null);
+                        if (p != null) lsConnectTo.add(p);
+                    }
 
                     long connResult = dbh.connectTitleAndPlatforms(titleID, lsConnectTo);
 

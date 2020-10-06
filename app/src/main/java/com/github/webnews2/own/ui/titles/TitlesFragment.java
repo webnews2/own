@@ -55,7 +55,7 @@ public class TitlesFragment extends Fragment {
         fab.setOnClickListener(view -> {
             // Open new dialog fragment for adding a game title
             AddTitleFragment newTitle = new AddTitleFragment();
-            newTitle.setOnDismissListener(dialog -> titlesAdapter.notifyDataSetChanged());
+            newTitle.setOnDismissListener(dialog -> DataHolder.getInstance().updateGames(titlesAdapter));
             newTitle.show(getChildFragmentManager(), "");
         });
 

@@ -11,10 +11,4 @@
         android:width="82dp"
         android:height="82dp" />
 
-    <padding
-        android:top="12dp"
-        android:right="12dp"
-        android:bottom="12dp"
-        android:left="12dp" />
-
 </shape>

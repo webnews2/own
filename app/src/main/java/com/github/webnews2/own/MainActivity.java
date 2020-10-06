@@ -1,13 +1,6 @@
 package com.github.webnews2.own;
 
-import android.content.Context;
 import android.os.Bundle;
-import android.view.View;
-
-import com.github.webnews2.own.utilities.DBHelper;
-import com.github.webnews2.own.utilities.Platform;
-import com.github.webnews2.own.utilities.Title;
-import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.navigation.NavController;
@@ -15,8 +8,8 @@ import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 
-import java.util.ArrayList;
-import java.util.List;
+import com.github.webnews2.own.utilities.DBHelper;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 public class MainActivity extends AppCompatActivity {
 

@@ -117,7 +117,7 @@ public class WishListFragment extends Fragment {
                 }
                 else {
                     // Check if title already exists (no matter if as wish list or normal title) > gets added to list if true
-                    List<Title> lsContained = DataHolder.getInstance().getWishList().stream()
+                    List<Title> lsContained = DataHolder.getInstance().getTitles().stream()
                             .filter(title -> title.getName().equals(input)).collect(Collectors.toList());
 
                     // Title doesn't exist

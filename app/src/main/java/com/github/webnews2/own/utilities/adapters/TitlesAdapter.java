@@ -1,7 +1,10 @@
 package com.github.webnews2.own.utilities.adapters;
 
+import android.Manifest;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.net.Uri;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -9,6 +12,10 @@ import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import androidx.core.content.ContextCompat;
+import androidx.core.content.PermissionChecker;
+
+import com.bumptech.glide.Glide;
 import com.github.webnews2.own.R;
 import com.github.webnews2.own.utilities.Title;
 
@@ -68,7 +75,14 @@ public class TitlesAdapter extends BaseAdapter {
 
         final Title t = getItem(position);
 
-        vh.ivThumbnail.setImageURI(null);
+        // Get path of thumbnail and permission status
+        String thumbPath = t.getThumbnail();
+        boolean permGranted = ContextCompat.checkSelfPermission(context, Manifest.permission.READ_EXTERNAL_STORAGE)
+                == PackageManager.PERMISSION_GRANTED;
+
+        // Load image is permission is granted and image exists
+        if (permGranted && !TextUtils.isEmpty(thumbPath)) Glide.with(context).load(Uri.parse(thumbPath)).into(vh.ivThumbnail);
+
         vh.tvGameName.setText(t.getName());
 
         return convertView;

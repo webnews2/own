@@ -1,7 +1,5 @@
 package com.github.webnews2.own.utilities;
 
-import android.media.Image;
-
 import java.util.ArrayList;
 
 public class Title {
