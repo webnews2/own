@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ui.games.AddEditGameFragment">
+    tools:context=".ui.games.AddEditViewGameFragment">
 
     <com.google.android.material.appbar.AppBarLayout
         android:id="@+id/appbarAddTitles"
@@ -18,7 +18,7 @@
             app:contentInsetStartWithNavigation="0dp"
             app:menu="@menu/add_title_menu"
             app:navigationIcon="@drawable/ic_close_white_24dp"
-            app:title="@string/title_add_title"
+            app:title="@string/games_add"
             app:titleTextColor="#FFFFFF" />
 
     </com.google.android.material.appbar.AppBarLayout>
@@ -39,7 +39,7 @@
                 android:layout_marginStart="16dp"
                 android:layout_marginTop="16dp"
                 android:background="@drawable/ic_image_placeholder"
-                android:contentDescription="@string/iv_descr"
+                android:contentDescription="@string/game_iv_descr"
                 android:scaleType="centerCrop"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
@@ -51,7 +51,7 @@
                 android:layout_marginEnd="8dp"
                 android:layout_marginBottom="8dp"
                 android:background="@null"
-                android:contentDescription="@string/ib_descr"
+                android:contentDescription="@string/game_ib_descr"
                 android:src="@drawable/ic_image_search_white_24dp"
                 app:layout_constraintBottom_toBottomOf="@+id/ivThumbnail"
                 app:layout_constraintEnd_toEndOf="@+id/ivThumbnail" />
@@ -63,7 +63,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="16dp"
                 android:layout_marginEnd="16dp"
-                app:helperText="Enter the title of the game."
+                app:helperText="@string/game_title_helper"
                 app:layout_constraintBottom_toTopOf="@+id/llBottomPart"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toEndOf="@+id/ivThumbnail">
@@ -72,7 +72,7 @@
                     android:id="@+id/etGameTitle"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="Game title"
+                    android:hint="@string/game_title"
                     android:inputType="text"
                     android:maxLines="1" />
 
@@ -93,13 +93,13 @@
                     style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    app:helperText="Enter the location where you've last seen the physical copy.">
+                    app:helperText="@string/game_location_helper">
 
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/etLocation"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:hint="Location"
+                        android:hint="@string/game_location"
                         android:inputType="text"
                         android:maxLines="1" />
 
@@ -127,13 +127,13 @@
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="Platforms"
+                                android:text="@string/game_platforms"
                                 android:textAppearance="@style/TextAppearance.MaterialComponents.Subtitle1" />
 
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="Click on the button to choose platforms for the current title. They will be listed below. To add or delete platforms in general please visit the settings page."
+                                android:text="@string/game_platforms_helper"
                                 android:textAppearance="@style/TextAppearance.MaterialComponents.Caption"
                                 android:textColor="@color/mtrl_indicator_text_color" />
 
@@ -141,11 +141,12 @@
 
                         <com.google.android.material.button.MaterialButton
                             android:id="@+id/btnChoosePlatforms"
+                            style="@style/Widget.MaterialComponents.Button"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_gravity="center"
                             android:layout_weight="0"
-                            android:text="Choose" />
+                            android:text="@string/game_platforms_choose" />
 
                     </LinearLayout>
 

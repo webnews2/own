@@ -25,14 +25,28 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * A simple {@link Fragment} subclass.
+ * This fragment is used to add, edit, delete and display platform information. All of these functions are implemented
+ * and work as expected.
+ *
+ * @author Kevin Kleiber (m26675)
+ * @version 1.0
  */
 public class PlatformsFragment extends Fragment {
-
+    /**
+     * Constructs a new PlatformFragment which can be used for displaying the user's platforms and manipulate them.
+     */
     public PlatformsFragment() {
         // Required empty public constructor
     }
 
+    /**
+     * Handles what happens when the fragment's views and therefore the user interface is going to be created.
+     *
+     * @param inflater used to inflate the fragment's UI
+     * @param container view that the fragment's UI should be attached to
+     * @param savedInstanceState if non-null, fragment can be re-constructed from previous saved state
+     * @return view of the fragment's UI
+     */
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         // Inflate the layout for this fragment
@@ -45,7 +59,6 @@ public class PlatformsFragment extends Fragment {
         // Set up adapter for list view
         PlatformsAdapter platformsAdapter = new PlatformsAdapter(DataHolder.getInstance().getPlatforms(), getContext());
 
-        // TODO: Remember adapter position > http://vikinghammer.com/2011/06/17/android-listview-maintain-your-scroll-position-when-you-refresh/
         // Set up list view by adding header and adapter
         ListView lvPlatforms = root.findViewById(R.id.lvPlatforms);
         lvPlatforms.addHeaderView(inflater.inflate(R.layout.row_action_primary, lvPlatforms, false), null, false);
@@ -108,7 +121,7 @@ public class PlatformsFragment extends Fragment {
             return false;
         });
 
-        // Set click method for button on right side of input UI > adds new platforms to db or resets input UI
+        // Set click method for button on right side of input UI > adds new platform to db or resets input UI
         ibActionFirstRight.setOnClickListener(v -> {
             // If check button is visible and input field is focused
             if (v.getVisibility() == View.VISIBLE && etActionFirst.isFocused()) {
@@ -147,6 +160,7 @@ public class PlatformsFragment extends Fragment {
             }
         });
 
+        // Return inflated UI view
         return root;
     }
 }

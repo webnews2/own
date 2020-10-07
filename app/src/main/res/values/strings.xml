@@ -1,13 +1,20 @@
 <resources>
-    <string name="app_name">own</string>
+    <string name="app_name" translatable="false">own</string>
     <string name="title_wish_list">Wish list</string>
     <string name="title_games">Games</string>
     <string name="title_settings">Settings</string>
 
-    <string name="iv_descr">Thumbnail of the game.</string>
-    <string name="ib_descr">Choose a thumbnail for the game.</string>
+    <!-- UI -->
+    <string name="game_iv_descr">Thumbnail of the game.</string>
+    <string name="game_ib_descr">Choose a thumbnail for the game.</string>
+    <string name="game_title_helper">Enter the title of the game.</string>
+    <string name="game_title">Game title</string>
+    <string name="game_location_helper">Enter the location where you\'ve last seen the physical copy.</string>
+    <string name="game_location">Location</string>
+    <string name="game_platforms">Platforms</string>
+    <string name="game_platforms_helper">Click on the button to choose platforms for the current title. They will be listed below. To manage your platforms please use the options menu on your games list.</string>
+    <string name="game_platforms_choose">Choose</string>
 
-    <string name="title_add_title">Add title</string>
     <string name="action_save">Save</string>
 
     <string name="msg_field_required">This field can\'t be empty.</string>
@@ -20,10 +27,12 @@
     <string name="lbl_update">Update</string>
     <string name="lbl_delete">Delete</string>
 
+    <!-- Titles -->
+    <string name="title_on_wishlist">This title is already on your wish list.</string>
+    <string name="title_owned">You already own this title. Please check your games list.</string>
+
     <!-- Wish list -->
-    <string name="wishlist_add">Add a new wish list title</string>
-    <string name="wishlist_title_exists">This title is already on your wish list.</string>
-    <string name="wishlist_title_owned">You already own this title. Check your games.</string>
+    <string name="wishlist_add">Add new title to wish list</string>
     <string name="wishlist_delete_dialog_title">Delete wish list title?</string>
     <string name="wishlist_delete_dialog_msg">This wish list title will be deleted.</string>
     <string name="wishlist_add_error">There was an error while adding the title to your wish list, please try again later.</string>
@@ -31,6 +40,10 @@
     <string name="wishlist_delete_error">There was an error while deleting the wish list title, please try again later.</string>
 
     <!-- Games -->
+    <string name="games_add">Add game</string>
+    <string name="games_select_image">Select Image</string>
+    <string name="games_no_app_found">No suitable app was found.</string>
+    <string name="games_no_platforms">Please add platforms in order to connect games and platforms.</string>
     <string name="games_delete_dialog_title">Delete game?</string>
     <string name="games_delete_dialog_msg">This game and all associations with platforms will be deleted. The affected platforms won\'t be deleted.</string>
     <string name="games_add_error">There was an error while adding the game to your list, please try again later.</string>
@@ -53,5 +66,14 @@
     <string name="perms_denied">The permission for this action was denied.</string>
     <string name="perms_request_dialog_title">Permission request</string>
     <string name="perms_request_dialog_storage_descr">The permission for storage access is needed to access images from your phone to display them in your games list.\n\nIf you deny the permission this time permanently you need to grant it through the app settings.</string>
+
+    <!-- Preferences -->
+    <string name="pref_cat_games">Games</string>
+    <string name="pref_cat_games_show_location_title">Show location in list</string>
+    <string name="pref_cat_games_show_location_summ_off">If disabled, the last entered location of the physical copy won\'t be displayed in your games list.</string>
+    <string name="pref_cat_games_show_location_summ_on">If enabled, the last entered location of the physical copy will be displayed in your games list.</string>
+    <string name="pref_cat_games_show_platforms_title">Show platforms in list</string>
+    <string name="pref_cat_games_show_platforms_summ_off">If disabled, the platforms connected to a game won\'t be displayed in your games list.</string>
+    <string name="pref_cat_games_show_platforms_summ_on">If enabled, the platforms connected to a game will be displayed in your games list.</string>
 
 </resources>

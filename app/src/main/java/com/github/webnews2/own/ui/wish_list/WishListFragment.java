@@ -24,22 +24,37 @@ import net.yslibrary.android.keyboardvisibilityevent.util.UIUtil;
 import java.util.List;
 import java.util.stream.Collectors;
 
-
+/**
+ * This fragment is used to add, edit, delete and display the user's wish list. All of these functions are implemented
+ * and work as expected.
+ *
+ * @author Kevin Kleiber (m26675)
+ * @version 1.0
+ */
 public class WishListFragment extends Fragment {
-
+    /**
+     * Constructs a new WishListFragment which can be used for displaying the user's wish list and manipulate it.
+     */
     public WishListFragment() {
         // Required empty public constructor
     }
 
-    public View onCreateView( LayoutInflater inflater,
-                             ViewGroup container, Bundle savedInstanceState) {
+    /**
+     * Handles what happens when the fragment's views and therefore the user interface is going to be created.
+     *
+     * @param inflater used to inflate the fragment's UI
+     * @param container view that the fragment's UI should be attached to
+     * @param savedInstanceState if non-null, fragment can be re-constructed from previous saved state
+     * @return view of the fragment's UI
+     */
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View root = inflater.inflate(R.layout.fragment_wish_list, container, false);
 
         // Set up adapter for list view
         WishListAdapter wishListAdapter = new WishListAdapter(DataHolder.getInstance().getWishList(), getContext());
 
-        // TODO: see PlatformsFragment for more information
         // Set up list view by adding header and adapter
         ListView lvWishList = root.findViewById(R.id.lvWishList);
         lvWishList.addHeaderView(inflater.inflate(R.layout.row_action_primary, lvWishList, false), null, false);
@@ -68,7 +83,7 @@ public class WishListFragment extends Fragment {
         etActionFirst.setHint(R.string.wishlist_add);
         // Set focus change method > just handles UI changes
         etActionFirst.setOnFocusChangeListener((v, hasFocus) -> {
-            // If input field is focused > enable "Add a new wish list title" UI
+            // If input field is focused > enable "Add new title to wish list" UI
             if (hasFocus) {
                 ibActionFirstLeft.setImageResource(R.drawable.ic_close_white_24dp);
                 ibActionFirstLeft.setColorFilter(getResources().getColor(R.color.color_red, null));
@@ -116,7 +131,7 @@ public class WishListFragment extends Fragment {
                     UIUtil.hideKeyboard(getContext(), etActionFirst);
                 }
                 else {
-                    // Check if title already exists (no matter if as wish list or normal title) > gets added to list if true
+                    // Check if wish list title already exists > gets added to list if true
                     List<Title> lsContained = DataHolder.getInstance().getTitles().stream()
                             .filter(title -> title.getName().equals(input)).collect(Collectors.toList());
 
@@ -137,18 +152,18 @@ public class WishListFragment extends Fragment {
                     }
                     // Title already exists > inform user
                     else {
-                        // TODO: Change when new data structure is implemented
                         // Get title out of list, there should only be one entry
                         Title t = lsContained.get(0);
 
                         // Distinguish between wish list and normal titles
-                        if (t.isOnWishList()) Snackbar.make(root, R.string.wishlist_title_exists, Snackbar.LENGTH_LONG).show();
-                        else Snackbar.make(root, R.string.wishlist_title_owned, Snackbar.LENGTH_LONG).show();
+                        if (t.isOnWishList()) Snackbar.make(root, R.string.title_on_wishlist, Snackbar.LENGTH_LONG).show();
+                        else Snackbar.make(root, R.string.title_owned, Snackbar.LENGTH_LONG).show();
                     }
                 }
             }
         });
 
+        // Return inflated UI view
         return root;
     }
 }

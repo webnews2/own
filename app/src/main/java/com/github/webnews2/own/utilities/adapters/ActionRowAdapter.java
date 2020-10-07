@@ -15,6 +15,14 @@ import java.util.HashMap;
 
 // TODO: Fix UI state on scroll
 // DONE: Improve performance, https://guides.codepath.com/android/Using-a-BaseAdapter-with-ListView
+
+/**
+ * This adapter class was originally created to be usable as a generic adapter but the idea needs some more work.
+ * Therefore ignore this class for now.
+ *
+ * @author Kevin Kleiber (m26675)
+ * @version 1.0
+ */
 public class ActionRowAdapter extends BaseAdapter {
 
     private static class ViewHolder {

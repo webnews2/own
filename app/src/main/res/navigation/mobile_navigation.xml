@@ -27,13 +27,12 @@
     <fragment
         android:id="@+id/navigation_settings"
         android:name="com.github.webnews2.own.ui.settings.SettingsFragment"
-        android:label="@string/title_settings"
-        tools:layout="@layout/fragment_settings" />
+        android:label="@string/title_settings" />
 
     <fragment
         android:id="@+id/addTitlesFragment"
-        android:name="com.github.webnews2.own.ui.games.AddEditGameFragment"
-        android:label="@string/title_add_title"
+        android:name="com.github.webnews2.own.ui.games.AddEditViewGameFragment"
+        android:label="@string/games_add"
         tools:layout="@layout/fragment_add_title" />
     <fragment
         android:id="@+id/platformsFragment"
